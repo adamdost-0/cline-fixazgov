@@ -51,17 +51,18 @@ export const AzureOpenAIProvider = ({ showModelOptions, isPopup, currentMode }: 
 		}
 	}, [])
 
-	const debouncedRefreshOpenAiModels = useCallback((baseUrl?: string, apiKey?: string) => {
+	const debouncedRefreshOpenAiModels = useCallback((baseUrl?: string, apiKey?: string, azureIdentity?: boolean) => {
 		if (debounceTimerRef.current) {
 			clearTimeout(debounceTimerRef.current)
 		}
 
-		if (baseUrl && apiKey) {
+		// Auto-discovery works with both API Key and Azure Identity
+		if (baseUrl && (apiKey || azureIdentity)) {
 			debounceTimerRef.current = setTimeout(() => {
 				ModelsServiceClient.refreshOpenAiModels(
 					OpenAiModelsRequest.create({
 						baseUrl,
-						apiKey,
+						apiKey: apiKey || "",
 					}),
 				).catch((error) => {
 					console.error("Failed to refresh Azure OpenAI models:", error)
@@ -77,7 +78,8 @@ export const AzureOpenAIProvider = ({ showModelOptions, isPopup, currentMode }: 
 		if (url.includes(".services.ai.azure.com") || url.includes(".ai.azure.com")) {
 			return "Azure AI Foundry"
 		}
-		if (url.includes(".openai.azure.com") || url.includes("azure.com")) {
+		// More specific check for Azure OpenAI endpoints
+		if (url.includes(".openai.azure.com") || url.includes(".openai.azure.us") || url.includes(".openai.azure.cn")) {
 			return "Azure OpenAI"
 		}
 		return "Unknown"
@@ -117,7 +119,7 @@ export const AzureOpenAIProvider = ({ showModelOptions, isPopup, currentMode }: 
 							initialValue={apiConfiguration?.openAiBaseUrl || ""}
 							onChange={(value) => {
 								handleFieldChange("openAiBaseUrl", value)
-								debouncedRefreshOpenAiModels(value, apiConfiguration?.openAiApiKey)
+								debouncedRefreshOpenAiModels(value, apiConfiguration?.openAiApiKey, apiConfiguration?.azureIdentity)
 							}}
 							placeholder={"https://<resource>.openai.azure.com or https://<resource>.services.ai.azure.com"}
 							style={{ width: "100%", marginBottom: 10 }}
@@ -189,7 +191,7 @@ export const AzureOpenAIProvider = ({ showModelOptions, isPopup, currentMode }: 
 					initialValue={apiConfiguration?.openAiApiKey || ""}
 					onChange={(value) => {
 						handleFieldChange("openAiApiKey", value)
-						debouncedRefreshOpenAiModels(apiConfiguration?.openAiBaseUrl, value)
+						debouncedRefreshOpenAiModels(apiConfiguration?.openAiBaseUrl, value, apiConfiguration?.azureIdentity)
 					}}
 					providerName="Azure OpenAI"
 				/>
