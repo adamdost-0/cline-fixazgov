@@ -5,6 +5,7 @@ import { ClineTool } from "@/shared/tools"
 import { AIhubmixHandler } from "./providers/aihubmix"
 import { AnthropicHandler } from "./providers/anthropic"
 import { AskSageHandler } from "./providers/asksage"
+import { AzureOpenAiHandler } from "./providers/azure-openai"
 import { BasetenHandler } from "./providers/baseten"
 import { AwsBedrockHandler } from "./providers/bedrock"
 import { CerebrasHandler } from "./providers/cerebras"
@@ -136,6 +137,18 @@ function createHandlerForProvider(
 			})
 		case "openai":
 			return new OpenAiHandler({
+				onRetryAttempt: options.onRetryAttempt,
+				openAiApiKey: options.openAiApiKey,
+				openAiBaseUrl: options.openAiBaseUrl,
+				azureApiVersion: options.azureApiVersion,
+				azureIdentity: options.azureIdentity,
+				openAiHeaders: options.openAiHeaders,
+				openAiModelId: mode === "plan" ? options.planModeOpenAiModelId : options.actModeOpenAiModelId,
+				openAiModelInfo: mode === "plan" ? options.planModeOpenAiModelInfo : options.actModeOpenAiModelInfo,
+				reasoningEffort: mode === "plan" ? options.planModeReasoningEffort : options.actModeReasoningEffort,
+			})
+		case "azure-openai":
+			return new AzureOpenAiHandler({
 				onRetryAttempt: options.onRetryAttempt,
 				openAiApiKey: options.openAiApiKey,
 				openAiBaseUrl: options.openAiBaseUrl,

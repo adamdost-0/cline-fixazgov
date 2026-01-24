@@ -17,6 +17,10 @@
 			"label": "OpenAI Compatible"
 		},
 		{
+			"value": "azure-openai",
+			"label": "Azure OpenAI"
+		},
+		{
 			"value": "anthropic",
 			"label": "Anthropic"
 		},
