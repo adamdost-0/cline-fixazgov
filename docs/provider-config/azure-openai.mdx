@@ -1,12 +1,13 @@
 ---
 title: "Azure OpenAI"
-description: "Learn how to configure Cline with Azure OpenAI and Azure AI Foundry model endpoints."
+description: "Learn how to configure Cline with Azure OpenAI, Azure AI Foundry, and Azure Stack Hub model endpoints."
 ---
 
-Cline supports Azure OpenAI Service as a dedicated provider with native support for both **Azure OpenAI** endpoints and **Azure AI Foundry** model endpoints. This provider offers enterprise-grade features including:
+Cline supports Azure OpenAI Service as a dedicated provider with native support for **Azure OpenAI** endpoints, **Azure AI Foundry** model endpoints, and **Azure Stack Hub** custom cloud deployments. This provider offers enterprise-grade features including:
 
 - **Azure Identity Authentication** - Seamless integration with Azure Active Directory, Managed Identities, and Service Principals
 - **Sovereign Cloud Support** - Works with Azure Commercial, Azure Government (US), and Azure China clouds
+- **Azure Stack Hub Support** - Full support for hybrid cloud deployments with custom audience URLs
 - **Azure AI Foundry Support** - Access to multi-provider models through Azure AI Foundry (formerly Azure AI Studio)
 - **Auto-Discovery** - Automatically discover available models from your Azure deployment
 - **Enterprise Security** - Leverage Azure's compliance, governance, and security features
@@ -55,6 +56,36 @@ https://<your-resource-name>.openai.azure.us
 ```
 https://<your-resource-name>.openai.azure.cn
 ```
+
+### Azure Stack Hub Endpoints
+
+Azure Stack Hub is Microsoft's hybrid cloud platform that runs Azure services in your own data center. Each Azure Stack deployment has custom endpoints and authentication scopes.
+
+#### Custom Endpoint Format
+```
+https://<your-resource-name>.<your-azure-stack-domain>
+```
+
+**Example:**
+```
+https://my-openai-resource.azurestack.contoso.com
+```
+
+#### Custom Audience URL Configuration
+
+When using Azure Stack Hub, you must specify a **Custom Audience URL** for authentication. This is the authentication scope used by Azure Identity.
+
+**Common Azure Stack Audience URLs:**
+- `https://cognitiveservices.azurestack.local`
+- `https://cognitiveservices.<your-domain>`
+- Custom audience as defined by your Azure Stack administrator
+
+**In Cline Settings:**
+1. Enter your Azure Stack endpoint URL in "Azure Endpoint URL"
+2. Enter your custom audience URL in "Custom Audience URL (Azure Stack)"
+3. The audience URL will automatically have `/.default` appended if not present
+
+**Note:** Leave the Custom Audience URL field empty for standard Azure clouds (Commercial, Government, China) - the correct audience will be auto-detected from your endpoint URL.
 
 ## Authentication Methods
 
@@ -216,7 +247,27 @@ Deployment: gpt-4o-gov-secure
 - Verify URL format matches Azure patterns
 - For Azure OpenAI: `https://<name>.openai.azure.com`
 - For Foundry: `https://<name>.services.ai.azure.com`
+- For Azure Stack: Use Custom Audience URL field
 - Check for typos or extra path segments
+
+### Azure Stack Authentication Issues
+
+**"Invalid Audience" or "Authentication Failed":**
+- Verify the Custom Audience URL is correct for your Azure Stack deployment
+- Contact your Azure Stack administrator for the correct audience URL
+- Ensure the format includes the protocol (https://)
+- Example: `https://cognitiveservices.azurestack.contoso.com`
+
+**Testing Azure Stack Configuration:**
+```bash
+# Verify endpoint accessibility
+curl https://<your-stack-endpoint>/openai/deployments
+
+# Test authentication with Azure CLI (if configured for Stack)
+az cloud set --name AzureStackUser
+az login
+az account show
+```
 
 ### Rate Limiting / Quota Errors
 
@@ -284,6 +335,7 @@ Endpoint: https://prod-openai.openai.azure.com
 Auth: Azure Identity ✓
 Model: gpt-4o-production
 API Version: (default)
+Custom Audience URL: (leave empty - auto-detected)
 ```
 
 ### Azure AI Foundry Multi-Model
@@ -292,6 +344,7 @@ Provider: Azure OpenAI
 Endpoint: https://my-foundry.services.ai.azure.com
 Auth: Azure Identity ✓
 Model: gpt-4o (auto-discovered)
+Custom Audience URL: (leave empty - auto-detected)
 ```
 
 ### Sovereign Cloud (Government)
@@ -301,12 +354,27 @@ Endpoint: https://gov-openai.openai.azure.us
 Auth: Azure Identity ✓
 Model: gpt-4o-gov
 API Version: 2024-02-01
+Custom Audience URL: (leave empty - auto-detected)
 ```
+
+### Azure Stack Hub
+```
+Provider: Azure OpenAI
+Endpoint: https://openai-resource.azurestack.contoso.com
+Auth: Azure Identity ✓
+Model: gpt-4o-deployment
+API Version: 2024-02-15-preview
+Custom Audience URL: https://cognitiveservices.azurestack.contoso.com
+```
+
+**Note:** For Azure Stack, the Custom Audience URL is required and must match your Azure Stack deployment's cognitive services audience. Contact your Azure Stack administrator if you're unsure of the correct value.
 
 ## Additional Resources
 
 - [Azure OpenAI Service Documentation](https://learn.microsoft.com/azure/ai-services/openai/)
 - [Azure AI Foundry Documentation](https://learn.microsoft.com/azure/ai-studio/)
+- [Azure Stack Hub Documentation](https://learn.microsoft.com/azure-stack/operator/)
+- [Azure Stack Hub Identity Overview](https://learn.microsoft.com/azure-stack/operator/azure-stack-identity-overview)
 - [Azure Identity Authentication](https://learn.microsoft.com/azure/developer/intro/azure-developer-identity)
 - [Azure RBAC for AI Services](https://learn.microsoft.com/azure/ai-services/openai/how-to/role-based-access-control)
 - [Azure OpenAI Quotas and Limits](https://learn.microsoft.com/azure/ai-services/openai/quotas-limits)
@@ -314,4 +382,4 @@ API Version: 2024-02-01
 
 ## Summary
 
-The Azure OpenAI provider in Cline offers a seamless, enterprise-ready experience for working with Azure-hosted AI models. Whether you're using traditional Azure OpenAI deployments or exploring the multi-provider capabilities of Azure AI Foundry, Cline provides the flexibility and security features you need for professional development.
+The Azure OpenAI provider in Cline offers a seamless, enterprise-ready experience for working with Azure-hosted AI models. Whether you're using traditional Azure OpenAI deployments, exploring the multi-provider capabilities of Azure AI Foundry, or deploying on Azure Stack Hub in your own data center, Cline provides the flexibility and security features you need for professional development across all Azure environments.
