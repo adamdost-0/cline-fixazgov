@@ -39,6 +39,13 @@ export class OpenAiHandler implements ApiHandler {
 				return baseUrl.toLowerCase()
 			}
 		})()
+		
+		// Azure AI Foundry uses different audience scope
+		if (host.includes(".services.ai.azure.com") || host.includes(".ai.azure.com")) {
+			return "https://ai.azure.com/.default"
+		}
+		
+		// Azure OpenAI sovereign cloud support
 		return host.includes(".azure.us") || host.endsWith(".us")
 			? "https://cognitiveservices.azure.us/.default"
 			: "https://cognitiveservices.azure.com/.default"
@@ -51,8 +58,11 @@ export class OpenAiHandler implements ApiHandler {
 			}
 			try {
 				const baseUrl = this.options.openAiBaseUrl?.toLowerCase() ?? ""
-				const isAzureDomain = baseUrl.includes("azure.com") || baseUrl.includes("azure.us")
-				// Azure API shape slightly differs from the core API shape...
+				const isAzureOpenAI = baseUrl.includes("azure.com") || baseUrl.includes("azure.us")
+				const isAzureFoundry = baseUrl.includes(".services.ai.azure.com") || baseUrl.includes(".ai.azure.com")
+				const isAzureDomain = isAzureOpenAI || isAzureFoundry
+				
+				// Azure API shape (both OpenAI and Foundry) slightly differs from the core API shape...
 				if (
 					this.options.azureApiVersion ||
 					(isAzureDomain && !this.options.openAiModelId?.toLowerCase().includes("deepseek"))

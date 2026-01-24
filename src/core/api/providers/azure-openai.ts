@@ -32,6 +32,13 @@ export class AzureOpenAiHandler implements ApiHandler {
 
 	private getAzureAudienceScope(baseUrl?: string): string {
 		const url = baseUrl?.toLowerCase() ?? ""
+		
+		// Azure AI Foundry uses different audience scope
+		if (url.includes(".services.ai.azure.com") || url.includes(".ai.azure.com")) {
+			return "https://ai.azure.com/.default"
+		}
+		
+		// Azure OpenAI sovereign cloud support
 		if (url.includes("azure.us")) return "https://cognitiveservices.azure.us/.default"
 		if (url.includes("azure.cn")) return "https://cognitiveservices.azure.cn/.default"
 		if (url.includes("azure.com")) return "https://cognitiveservices.azure.com/.default"
