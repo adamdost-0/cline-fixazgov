@@ -1,0 +1,317 @@
+---
+title: "Azure OpenAI"
+description: "Learn how to configure Cline with Azure OpenAI and Azure AI Foundry model endpoints."
+---
+
+Cline supports Azure OpenAI Service as a dedicated provider with native support for both **Azure OpenAI** endpoints and **Azure AI Foundry** model endpoints. This provider offers enterprise-grade features including:
+
+- **Azure Identity Authentication** - Seamless integration with Azure Active Directory, Managed Identities, and Service Principals
+- **Sovereign Cloud Support** - Works with Azure Commercial, Azure Government (US), and Azure China clouds
+- **Azure AI Foundry Support** - Access to multi-provider models through Azure AI Foundry (formerly Azure AI Studio)
+- **Auto-Discovery** - Automatically discover available models from your Azure deployment
+- **Enterprise Security** - Leverage Azure's compliance, governance, and security features
+
+## Configuration
+
+You'll find these settings in the Cline settings panel (click the ⚙️ icon):
+
+1. **API Provider:** Select "Azure OpenAI"
+2. **Azure Endpoint URL:** Enter your Azure endpoint URL (see below for formats)
+3. **Azure API Version:** (Optional) Specify the API version (defaults to latest stable)
+4. **Authentication Method:** Choose between API Key or Azure Identity
+5. **Model ID / Deployment Name:** Enter your deployment name or model ID
+6. **Auto-Discover Models:** Click to fetch available models automatically
+
+### Azure Endpoint URL Formats
+
+#### Azure OpenAI Service
+```
+https://<your-resource-name>.openai.azure.com
+```
+
+**Example:**
+```
+https://my-openai-resource.openai.azure.com
+```
+
+#### Azure AI Foundry
+```
+https://<your-resource-name>.services.ai.azure.com
+```
+
+**Example:**
+```
+https://my-foundry-resource.services.ai.azure.com
+```
+
+### Sovereign Cloud Endpoints
+
+#### Azure Government (US)
+```
+https://<your-resource-name>.openai.azure.us
+```
+
+#### Azure China
+```
+https://<your-resource-name>.openai.azure.cn
+```
+
+## Authentication Methods
+
+### Method 1: API Key Authentication
+
+1. Navigate to your Azure OpenAI resource in the Azure Portal
+2. Go to "Keys and Endpoint" section
+3. Copy one of your API keys
+4. Paste the key into the "API Key" field in Cline
+5. Leave "Use Azure Identity Authentication" **unchecked**
+
+**When to use:**
+- Quick setup and testing
+- Local development
+- Single-user scenarios
+
+### Method 2: Azure Identity Authentication (Recommended for Production)
+
+Azure Identity uses `DefaultAzureCredential` which automatically detects and uses available credentials in this order:
+
+1. Environment variables
+2. Managed Identity (for Azure VMs, App Services, etc.)
+3. Azure CLI credentials (after running `az login`)
+4. Visual Studio Code credentials
+5. Interactive browser authentication
+
+**Setup:**
+
+1. Ensure you're logged in to Azure:
+   ```bash
+   az login
+   ```
+
+2. In Cline settings, check **"Use Azure Identity (Managed Identity / Service Principal)"**
+3. Leave the API Key field empty
+
+**When to use:**
+- Production deployments
+- Team environments
+- CI/CD pipelines
+- Enhanced security requirements
+- Need for granular RBAC permissions
+
+**Required Azure RBAC Role:**
+Your Azure identity needs at least the **"Cognitive Services User"** role on the Azure OpenAI or AI Foundry resource:
+
+```bash
+az role assignment create \
+  --role "Cognitive Services User" \
+  --assignee <your-user-or-principal-id> \
+  --scope /subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.CognitiveServices/accounts/<resource-name>
+```
+
+## Deployment Names vs Model IDs
+
+### Azure OpenAI
+In Azure OpenAI, you create **deployments** for specific models. Use your deployment name in the Model ID field.
+
+**Example:**
+- You create a deployment named "gpt-4o-production"
+- Use `gpt-4o-production` as the Model ID in Cline
+
+### Azure AI Foundry
+Azure AI Foundry supports both deployment-based and direct model access patterns depending on the model type.
+
+**Example deployment names:**
+- `my-gpt4o-deployment`
+- `claude-3-5-sonnet-v2`
+- `llama-3-1-70b-instruct`
+
+## Auto-Discovery Feature
+
+The Auto-Discovery feature automatically fetches available models from your Azure endpoint:
+
+1. Enter your Azure Endpoint URL
+2. Configure authentication (API Key or Azure Identity)
+3. Click **"Auto-Discover Models"** button
+4. Cline will fetch and cache available models
+5. If discovery fails, it defaults to GPT-4o configuration
+
+**Benefits:**
+- Automatically detects model capabilities (vision support, context window, etc.)
+- Reduces manual configuration
+- Keeps model information up-to-date
+- Works with both Azure OpenAI and Azure AI Foundry endpoints
+
+## Azure AI Foundry vs Azure OpenAI
+
+| Feature | Azure OpenAI | Azure AI Foundry |
+|---------|-------------|------------------|
+| **Endpoint Pattern** | `*.openai.azure.com` | `*.services.ai.azure.com` |
+| **Model Selection** | OpenAI models only | OpenAI, Anthropic, Meta, Mistral, and more |
+| **Authentication Scope** | `https://cognitiveservices.azure.com` | `https://ai.azure.com` |
+| **Best For** | OpenAI model deployments | Multi-provider model access |
+
+Cline **automatically detects** which endpoint type you're using and applies the correct authentication scope.
+
+## Model Configuration
+
+After selecting your model, you can configure advanced settings:
+
+- **Supports Images:** Enable for vision-capable models (GPT-4o, GPT-4 Vision)
+- **Enable R1 Format:** For specialized reasoning models
+- **Context Window:** Maximum tokens the model can process
+- **Max Output Tokens:** Maximum tokens the model can generate
+- **Temperature:** Controls randomness (configured via model info)
+
+## Common Deployment Patterns
+
+### Pattern 1: Single Resource, Multiple Deployments
+```
+Endpoint: https://my-resource.openai.azure.com
+Deployments:
+  - gpt-4o-production (for production)
+  - gpt-4o-mini-dev (for development)
+  - gpt-35-turbo-test (for testing)
+```
+
+### Pattern 2: Azure AI Foundry Multi-Model
+```
+Endpoint: https://my-foundry.services.ai.azure.com
+Models:
+  - gpt-4o (OpenAI)
+  - claude-3-5-sonnet (Anthropic via Foundry)
+  - llama-3-1-70b (Meta via Foundry)
+```
+
+### Pattern 3: Sovereign Cloud
+```
+Government Cloud: https://gov-resource.openai.azure.us
+Authentication: Azure Identity (Managed Identity)
+Deployment: gpt-4o-gov-secure
+```
+
+## Troubleshooting
+
+### "Invalid API Key" or "Authentication Failed"
+
+**For API Key:**
+- Verify the key is copied correctly from Azure Portal
+- Ensure the key belongs to the resource specified in the endpoint URL
+- Check if the key has been regenerated (Azure supports 2 keys)
+
+**For Azure Identity:**
+- Run `az login` and verify authentication
+- Check RBAC role assignments on the resource
+- Ensure DefaultAzureCredential can access the resource
+- Try running: `az account show` to verify active subscription
+
+### "Model Not Found" or "Deployment Not Found"
+
+- Verify the deployment name exists in your Azure resource
+- Check that the deployment is in "Succeeded" state (not deploying/failed)
+- Ensure model capacity is available in your region
+- Try using Auto-Discovery to list available deployments
+
+### "Endpoint Type Not Detected"
+
+- Verify URL format matches Azure patterns
+- For Azure OpenAI: `https://<name>.openai.azure.com`
+- For Foundry: `https://<name>.services.ai.azure.com`
+- Check for typos or extra path segments
+
+### Rate Limiting / Quota Errors
+
+- Check your Azure OpenAI resource quotas in Azure Portal
+- Consider scaling up your deployment (TPM/RPM limits)
+- Implement retry logic (Cline includes automatic retries)
+- Monitor usage via Azure Monitor
+
+### Connection Errors
+
+- Verify network connectivity to Azure endpoints
+- Check firewall rules and NSG settings
+- Ensure the endpoint is in the correct Azure region
+- Test connectivity: `curl https://<your-endpoint>.openai.azure.com`
+
+### Auto-Discovery Not Working
+
+- Ensure authentication is configured correctly first
+- Check that you have read permissions on the resource
+- Verify the endpoint URL is complete and correct
+- If it continues to fail, manually enter deployment names
+
+## Best Practices
+
+### Security
+1. **Use Azure Identity in production** - More secure than API keys
+2. **Apply principle of least privilege** - Grant minimum required RBAC roles
+3. **Enable Azure Private Link** - For network isolation
+4. **Monitor access logs** - Use Azure Monitor and Log Analytics
+5. **Rotate API keys regularly** - If using key-based auth
+
+### Performance
+1. **Deploy in the same region as your application** - Reduces latency
+2. **Use appropriate model sizes** - Balance cost and capability
+3. **Implement caching** - For repeated queries
+4. **Monitor token usage** - Track and optimize prompt length
+
+### Cost Optimization
+1. **Use GPT-4o-mini for simple tasks** - Significantly cheaper than GPT-4o
+2. **Enable prompt caching** - Reduces redundant processing
+3. **Set max token limits** - Prevent unexpectedly large responses
+4. **Monitor usage via Azure Cost Management**
+
+### Reliability
+1. **Implement fallback models** - Have backup deployments
+2. **Use deployment versioning** - Test updates before production
+3. **Monitor deployment health** - Set up Azure alerts
+4. **Plan for capacity** - Request quota increases proactively
+
+## Example Configurations
+
+### Development Setup (Azure OpenAI)
+```
+Provider: Azure OpenAI
+Endpoint: https://dev-openai.openai.azure.com
+Auth: API Key
+Model: gpt-4o-mini-dev
+API Version: 2024-02-15-preview
+```
+
+### Production Setup (Azure Identity)
+```
+Provider: Azure OpenAI
+Endpoint: https://prod-openai.openai.azure.com
+Auth: Azure Identity ✓
+Model: gpt-4o-production
+API Version: (default)
+```
+
+### Azure AI Foundry Multi-Model
+```
+Provider: Azure OpenAI
+Endpoint: https://my-foundry.services.ai.azure.com
+Auth: Azure Identity ✓
+Model: gpt-4o (auto-discovered)
+```
+
+### Sovereign Cloud (Government)
+```
+Provider: Azure OpenAI
+Endpoint: https://gov-openai.openai.azure.us
+Auth: Azure Identity ✓
+Model: gpt-4o-gov
+API Version: 2024-02-01
+```
+
+## Additional Resources
+
+- [Azure OpenAI Service Documentation](https://learn.microsoft.com/azure/ai-services/openai/)
+- [Azure AI Foundry Documentation](https://learn.microsoft.com/azure/ai-studio/)
+- [Azure Identity Authentication](https://learn.microsoft.com/azure/developer/intro/azure-developer-identity)
+- [Azure RBAC for AI Services](https://learn.microsoft.com/azure/ai-services/openai/how-to/role-based-access-control)
+- [Azure OpenAI Quotas and Limits](https://learn.microsoft.com/azure/ai-services/openai/quotas-limits)
+- [Azure AI Foundry Model Catalog](https://learn.microsoft.com/azure/ai-studio/how-to/model-catalog)
+
+## Summary
+
+The Azure OpenAI provider in Cline offers a seamless, enterprise-ready experience for working with Azure-hosted AI models. Whether you're using traditional Azure OpenAI deployments or exploring the multi-provider capabilities of Azure AI Foundry, Cline provides the flexibility and security features you need for professional development.
