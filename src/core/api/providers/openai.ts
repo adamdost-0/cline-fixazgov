@@ -41,12 +41,13 @@ export class OpenAiHandler implements ApiHandler {
 		})()
 		
 		// Azure AI Foundry uses different audience scope
-		if (host.includes(".services.ai.azure.com") || host.includes(".ai.azure.com")) {
+		// Check that hostname ends with these domains (not just contains them)
+		if (host.endsWith(".services.ai.azure.com") || host.endsWith(".ai.azure.com")) {
 			return "https://ai.azure.com/.default"
 		}
 		
 		// Azure OpenAI sovereign cloud support
-		return host.includes(".azure.us") || host.endsWith(".us")
+		return host.endsWith(".azure.us") || host.endsWith("azure.us")
 			? "https://cognitiveservices.azure.us/.default"
 			: "https://cognitiveservices.azure.com/.default"
 	}
@@ -58,8 +59,16 @@ export class OpenAiHandler implements ApiHandler {
 			}
 			try {
 				const baseUrl = this.options.openAiBaseUrl?.toLowerCase() ?? ""
-				const isAzureOpenAI = baseUrl.includes("azure.com") || baseUrl.includes("azure.us")
-				const isAzureFoundry = baseUrl.includes(".services.ai.azure.com") || baseUrl.includes(".ai.azure.com")
+				let hostname = ""
+				try {
+					hostname = new URL(baseUrl).hostname.toLowerCase()
+				} catch {
+					hostname = baseUrl
+				}
+				
+				// Check for Azure endpoints using proper hostname validation
+				const isAzureOpenAI = hostname.endsWith(".openai.azure.com") || hostname.endsWith(".openai.azure.us") || hostname.endsWith(".openai.azure.cn")
+				const isAzureFoundry = hostname.endsWith(".services.ai.azure.com") || hostname.endsWith(".ai.azure.com")
 				const isAzureDomain = isAzureOpenAI || isAzureFoundry
 				
 				// Azure API shape (both OpenAI and Foundry) slightly differs from the core API shape...

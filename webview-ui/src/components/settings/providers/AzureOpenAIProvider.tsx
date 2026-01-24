@@ -74,12 +74,22 @@ export const AzureOpenAIProvider = ({ showModelOptions, isPopup, currentMode }: 
 	// Detect endpoint type based on baseUrl
 	const detectEndpointType = (baseUrl?: string): string => {
 		if (!baseUrl) return "Unknown"
-		const url = baseUrl.toLowerCase()
-		if (url.includes(".services.ai.azure.com") || url.includes(".ai.azure.com")) {
+		
+		// Parse hostname safely
+		let hostname = ""
+		try {
+			hostname = new URL(baseUrl).hostname.toLowerCase()
+		} catch {
+			// If URL parsing fails, try lowercase string
+			hostname = baseUrl.toLowerCase()
+		}
+		
+		// Check that hostname ends with these domains (not just contains them)
+		if (hostname.endsWith(".services.ai.azure.com") || hostname.endsWith(".ai.azure.com")) {
 			return "Azure AI Foundry"
 		}
 		// More specific check for Azure OpenAI endpoints
-		if (url.includes(".openai.azure.com") || url.includes(".openai.azure.us") || url.includes(".openai.azure.cn")) {
+		if (hostname.endsWith(".openai.azure.com") || hostname.endsWith(".openai.azure.us") || hostname.endsWith(".openai.azure.cn")) {
 			return "Azure OpenAI"
 		}
 		return "Unknown"
