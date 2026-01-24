@@ -16,6 +16,7 @@ interface AzureOpenAiHandlerOptions extends CommonApiHandlerOptions {
 	openAiBaseUrl?: string
 	azureApiVersion?: string
 	azureIdentity?: boolean
+	azureCustomAudienceUrl?: string
 	openAiHeaders?: Record<string, string>
 	openAiModelId?: string
 	openAiModelInfo?: OpenAiCompatibleModelInfo
@@ -31,6 +32,13 @@ export class AzureOpenAiHandler implements ApiHandler {
 	}
 
 	private getAzureAudienceScope(baseUrl?: string): string {
+		// If custom audience URL is provided (for Azure Stack or custom clouds), use it
+		if (this.options.azureCustomAudienceUrl) {
+			// Ensure it ends with /.default if not already present
+			const customUrl = this.options.azureCustomAudienceUrl.trim()
+			return customUrl.endsWith("/.default") ? customUrl : `${customUrl}/.default`
+		}
+		
 		const url = baseUrl?.toLowerCase() ?? ""
 		
 		// Parse URL safely to check hostname

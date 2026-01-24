@@ -118,6 +118,7 @@ const API_HANDLER_SETTINGS_FIELDS = {
 	qwenCodeOauthPath: { default: undefined as string | undefined },
 	azureApiVersion: { default: undefined as string | undefined },
 	azureIdentity: { default: undefined as boolean | undefined },
+	azureCustomAudienceUrl: { default: undefined as string | undefined },
 	qwenApiLine: { default: undefined as string | undefined },
 	moonshotApiLine: { default: undefined as string | undefined },
 	asksageApiUrl: { default: undefined as string | undefined },

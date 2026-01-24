@@ -174,6 +174,24 @@ export const AzureOpenAIProvider = ({ showModelOptions, isPopup, currentMode }: 
 				/>
 			)}
 
+			{/* Custom Audience URL for Azure Stack */}
+			<Tooltip>
+				<TooltipTrigger>
+					<BaseUrlField
+						initialValue={apiConfiguration?.azureCustomAudienceUrl}
+						label="Custom Audience URL (Azure Stack)"
+						onChange={(value) => handleFieldChange("azureCustomAudienceUrl", value)}
+						placeholder="e.g., https://cognitiveservices.azurestack.local"
+					/>
+				</TooltipTrigger>
+				<TooltipContent>
+					<div style={{ maxWidth: "300px" }}>
+						For Azure Stack Hub or custom Azure deployments. Leave empty to auto-detect based on endpoint URL.
+						The audience URL is used for authentication scope (e.g., https://cognitiveservices.azurestack.local/.default)
+					</div>
+				</TooltipContent>
+			</Tooltip>
+
 			{/* Authentication Section */}
 			<div style={{ marginBottom: 15 }}>
 				<VSCodeCheckbox
