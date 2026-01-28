@@ -313,9 +313,10 @@ export const MicrosoftFoundryProvider = ({ showModelOptions, isPopup, currentMod
 		setDiscoveryError(null)
 
 		try {
-			// Call the extension host to discover deployments via Azure CLI
+			// Call the extension host to discover deployments via Azure Resource Graph
 			const response = await ModelsServiceClient.getMicrosoftFoundryDeployments({
 				endpoint: endpoint.replace(/\/$/, ""),
+				armEndpoint: apiConfiguration?.microsoftFoundryArmEndpoint,
 			})
 
 			if (response.error) {
@@ -451,15 +452,31 @@ export const MicrosoftFoundryProvider = ({ showModelOptions, isPopup, currentMod
 				)}
 			</div>
 
-			{/* Custom Scope for Azure Stack */}
+			{/* Azure Stack Configuration */}
 			{cloudEnvironment === "stack" && (
-				<DebouncedTextField
-					className="w-full"
-					initialValue={apiConfiguration?.microsoftFoundryCustomScope ?? ""}
-					onChange={(value) => handleFieldChange("microsoftFoundryCustomScope", value)}
-					placeholder="https://cognitiveservices.your-stack/.default">
-					<span className="font-medium">Custom Audience Scope</span>
-				</DebouncedTextField>
+				<>
+					<DebouncedTextField
+						className="w-full"
+						initialValue={apiConfiguration?.microsoftFoundryArmEndpoint ?? ""}
+						onChange={(value) => handleFieldChange("microsoftFoundryArmEndpoint", value)}
+						placeholder="https://management.local.azurestack.external">
+						<span className="font-medium">Azure Resource Manager Endpoint</span>
+						<span className="text-xs text-description mt-1">
+							The ARM endpoint for your Azure Stack environment (used for resource discovery)
+						</span>
+					</DebouncedTextField>
+
+					<DebouncedTextField
+						className="w-full"
+						initialValue={apiConfiguration?.microsoftFoundryCustomScope ?? ""}
+						onChange={(value) => handleFieldChange("microsoftFoundryCustomScope", value)}
+						placeholder="https://cognitiveservices.local.azurestack.external/.default">
+						<span className="font-medium">Custom Audience Scope</span>
+						<span className="text-xs text-description mt-1">
+							The OAuth audience scope for Cognitive Services authentication
+						</span>
+					</DebouncedTextField>
+				</>
 			)}
 
 			{/* Deployment Selection */}

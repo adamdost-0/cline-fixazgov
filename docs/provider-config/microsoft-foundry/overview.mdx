@@ -94,8 +94,10 @@ Microsoft Foundry supports two authentication methods:
 3. Select **Microsoft Foundry** from the API Provider dropdown
 4. Enter your **Endpoint URL**
 5. Choose your **Cloud Environment** (Commercial, Government, or Stack)
+   - For **Stack**: Also enter ARM Endpoint and Custom Scope (see Azure Stack Configuration below)
 6. Select your authentication method
-7. Click **Discover Deployments** to find available models
+7. Click **Refresh Deployments** to find available models
+   - **Azure Stack Note:** Automatic discovery is not available; enter deployment name manually
 8. Select your deployment and start coding!
 
 ---
@@ -123,15 +125,27 @@ Microsoft Foundry supports two authentication methods:
     </Warning>
   </Tab>
   <Tab title="Stack">
-    **Azure Stack** enables on-premises and edge deployments.
+    **Azure Stack** enables on-premises and edge deployments with full control over infrastructure and data residency.
     
+    - **Azure Resource Manager Endpoint:** Custom (e.g., `https://management.local.azurestack.external`)
     - **Audience Scope:** Custom (configured by your administrator)
     - **Endpoint Format:** Varies by deployment
-    - **Use Case:** Air-gapped environments, data sovereignty requirements
+    - **Use Case:** Air-gapped environments, data sovereignty requirements, edge computing
     
-    <Note>
-    Azure Stack requires a custom audience scope configured in your Cline settings.
-    </Note>
+    <Warning>
+    **Azure Stack Deployment Discovery Limitation**
+    
+    Azure Stack Hub does not support Azure Resource Graph API, which Cline uses for automatic deployment discovery. 
+    You must **manually enter your deployment name** instead of using the "Refresh Deployments" button.
+    </Warning>
+    
+    <Info>
+    Azure Stack requires two custom values:
+    1. **Azure Resource Manager Endpoint** — For infrastructure operations (e.g., `https://management.local.azurestack.external`)
+    2. **Custom Audience Scope** — For Cognitive Services authentication (e.g., `https://cognitiveservices.local.azurestack.external/.default`)
+    
+    Contact your Azure Stack administrator for these values.
+    </Info>
   </Tab>
 </Tabs>
 

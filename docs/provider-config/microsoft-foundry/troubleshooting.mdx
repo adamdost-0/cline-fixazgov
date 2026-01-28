@@ -371,6 +371,59 @@ Before diving into specific issues, run through this checklist:
     - Check your Stack's Azure AD configuration
   </Accordion>
   
+  <Accordion title="Deployment discovery not available (Stack)">
+    **Issue:** The "Refresh Deployments" button is disabled for Azure Stack environments.
+    
+    **Explanation:**
+    
+    Azure Stack Hub does not support the Azure Resource Graph API, which Cline uses to automatically discover model deployments across subscriptions. This is a platform limitation, not a Cline issue.
+    
+    **Solution: Manual Deployment Entry**
+    
+    1. Find your deployment name in Azure Stack Portal:
+       - Navigate to your Azure OpenAI resource
+       - Go to **Deployments** section
+       - Note the exact deployment name (case-sensitive)
+    
+    2. In Cline settings:
+       - Select **Stack** as cloud environment
+       - Enter your **Azure Resource Manager Endpoint** (e.g., `https://management.local.azurestack.external`)
+       - Enter your **Custom Audience Scope** (e.g., `https://cognitiveservices.local.azurestack.external/.default`)
+       - Scroll to **Deployment** field
+       - Manually type your deployment name
+    
+    3. Test the connection by starting a chat
+    
+    <Tip>
+    Save your deployment name in a secure note for future reference. Unlike Azure Commercial/Government, Stack deployments cannot be refreshed automatically.
+    </Tip>
+  </Accordion>
+  
+  <Accordion title="Azure Resource Manager endpoint missing">
+    **Error Message:**
+    ```
+    Azure Stack environment requires an Azure Resource Manager endpoint to be configured.
+    ```
+    
+    **Solution:**
+    
+    1. Contact your Azure Stack administrator for the ARM endpoint
+    2. Common formats:
+       - `https://management.local.azurestack.external`
+       - `https://management.{region}.{domain}`
+    
+    3. In Cline settings:
+       - Select **Stack** environment
+       - Enter the ARM endpoint in **Azure Resource Manager Endpoint** field
+       - Enter the authentication scope in **Custom Audience Scope** field
+    
+    <Note>
+    The ARM endpoint and audience scope are different values:
+    - **ARM Endpoint** — Used for infrastructure/resource operations
+    - **Audience Scope** — Used for Cognitive Services API authentication
+    </Note>
+  </Accordion>
+  
   <Accordion title="Certificate trust issues">
     **Cause:** Azure Stack uses custom certificates.
     
@@ -384,6 +437,78 @@ Before diving into specific issues, run through this checklist:
        ```
   </Accordion>
 </AccordionGroup>
+
+---
+
+### Azure Stack Configuration Guide
+
+<Steps>
+  <Step title="Obtain Configuration from Administrator">
+    Contact your Azure Stack administrator for:
+    
+    | Setting | Example Value | Purpose |
+    |---------|---------------|------|
+    | Azure Resource Manager Endpoint | `https://management.local.azurestack.external` | Infrastructure operations |
+    | Cognitive Services Audience Scope | `https://cognitiveservices.local.azurestack.external/.default` | API authentication |
+    | Azure OpenAI Endpoint | `https://your-resource.local.azurestack.external` | Service endpoint |
+    | Deployment Name | `gpt-4o`, `my-deployment` | Model deployment identifier |
+  </Step>
+  
+  <Step title="Configure Azure CLI (if using Azure Identity)">
+    Register your Azure Stack environment:
+    
+    ```bash
+    # Register Azure Stack cloud
+    az cloud register \
+      --name "AzureStackUser" \
+      --endpoint-resource-manager "https://management.local.azurestack.external" \
+      --suffix-storage-endpoint "local.azurestack.external" \
+      --suffix-keyvault-dns ".vault.local.azurestack.external"
+    
+    # Set as active cloud
+    az cloud set --name "AzureStackUser"
+    
+    # Login to Azure Stack
+    az login
+    ```
+  </Step>
+  
+  <Step title="Configure Cline">
+    1. Open Cline settings
+    2. Select **Microsoft Foundry** provider
+    3. Choose **Stack** cloud environment
+    4. Enter **Azure Resource Manager Endpoint**
+    5. Enter **Custom Audience Scope**
+    6. Enter your **Endpoint URL**
+    7. Choose authentication method (Azure Identity or API Key)
+    8. **Manually enter** your deployment name (discovery is not available)
+  </Step>
+  
+  <Step title="Verify Configuration">
+    Test your setup:
+    
+    ```bash
+    # Verify Azure CLI context
+    az account show
+    
+    # Test endpoint connectivity
+    curl -I https://{your-endpoint}/
+    ```
+    
+    Then test in Cline by starting a new chat.
+  </Step>
+</Steps>
+
+<Warning>
+**Important Azure Stack Limitations**
+
+- **No Automatic Deployment Discovery** — Azure Resource Graph API is not available
+- **Manual Deployment Entry Required** — You must know and type deployment names
+- **Custom Endpoints Required** — Both ARM and Cognitive Services endpoints must be configured
+- **Certificate Trust** — You may need to install Azure Stack root certificates
+
+These are platform limitations, not Cline issues. Contact your Azure Stack administrator for assistance.
+</Warning>
 
 ---
 
