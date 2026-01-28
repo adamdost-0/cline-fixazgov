@@ -511,20 +511,28 @@ export class MicrosoftFoundryHandler implements ApiHandler {
 			throw new Error("No deployment selected. Please select a deployment from the Microsoft Foundry provider settings.")
 		}
 
-		// Determine if this is a reasoning model (o1/o3 family)
+		const deploymentLower = deploymentId.toLowerCase()
+
+		// Determine if this is a reasoning model (o1/o3/o4 family)
 		const isReasoningModel =
-			["o1", "o3", "o4"].some((prefix) => deploymentId.toLowerCase().includes(prefix)) &&
-			!deploymentId.toLowerCase().includes("chat")
+			["o1", "o3", "o4"].some((prefix) => deploymentLower.includes(prefix)) && !deploymentLower.includes("chat")
+
+		// Models that don't support custom temperature (only default value of 1)
+		// GPT-5.x models have this restriction
+		const noTemperatureSupport =
+			deploymentLower.includes("gpt-5") ||
+			deploymentLower.includes("gpt5") ||
+			// Add other models that don't support temperature as discovered
+			isReasoningModel
 
 		// Build messages array
 		let openAiMessages: OpenAI.Chat.ChatCompletionMessageParam[]
-		let temperature: number | undefined = 0.7
+		const temperature: number | undefined = noTemperatureSupport ? undefined : 0.7
 		let reasoningEffort: ChatCompletionReasoningEffort | undefined
 
 		if (isReasoningModel) {
 			// Reasoning models use 'developer' role for system prompt
 			openAiMessages = [{ role: "developer", content: systemPrompt }, ...convertToOpenAiMessages(messages)]
-			temperature = undefined // Reasoning models don't support temperature
 			reasoningEffort = "medium"
 		} else {
 			openAiMessages = [{ role: "system", content: systemPrompt }, ...convertToOpenAiMessages(messages)]

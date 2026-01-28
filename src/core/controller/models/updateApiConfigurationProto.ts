@@ -41,6 +41,13 @@ export async function updateApiConfigurationProto(
 					? convertProtoToApiProvider(protoApiConfiguration.actModeApiProvider!)
 					: undefined,
 
+			// Convert cloud environment string to union type
+			microsoftFoundryCloudEnvironment: protoApiConfiguration.microsoftFoundryCloudEnvironment as
+				| "commercial"
+				| "government"
+				| "stack"
+				| undefined,
+
 			// Convert ModelInfo objects (empty arrays → undefined)
 			// Plan Mode
 			planModeOpenRouterModelInfo: protoApiConfiguration.planModeOpenRouterModelInfo
@@ -76,6 +83,9 @@ export async function updateApiConfigurationProto(
 			planModeAihubmixModelInfo: protoApiConfiguration.planModeAihubmixModelInfo
 				? fromProtobufOpenAiCompatibleModelInfo(protoApiConfiguration.planModeAihubmixModelInfo)
 				: undefined,
+			planModeMicrosoftFoundryModelInfo: protoApiConfiguration.planModeMicrosoftFoundryModelInfo
+				? fromProtobufModelInfo(protoApiConfiguration.planModeMicrosoftFoundryModelInfo)
+				: undefined,
 
 			// Act Mode
 			actModeOpenRouterModelInfo: protoApiConfiguration.actModeOpenRouterModelInfo
@@ -110,6 +120,9 @@ export async function updateApiConfigurationProto(
 				: undefined,
 			actModeAihubmixModelInfo: protoApiConfiguration.actModeAihubmixModelInfo
 				? fromProtobufOpenAiCompatibleModelInfo(protoApiConfiguration.actModeAihubmixModelInfo)
+				: undefined,
+			actModeMicrosoftFoundryModelInfo: protoApiConfiguration.actModeMicrosoftFoundryModelInfo
+				? fromProtobufModelInfo(protoApiConfiguration.actModeMicrosoftFoundryModelInfo)
 				: undefined,
 			geminiPlanModeThinkingLevel: protoApiConfiguration.geminiPlanModeThinkingLevel,
 			geminiActModeThinkingLevel: protoApiConfiguration.geminiActModeThinkingLevel,

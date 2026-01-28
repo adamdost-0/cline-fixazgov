@@ -46,6 +46,12 @@ export async function updateSettings(controller: Controller, request: UpdateSett
 				actModeApiProvider: protoApiConfiguration.actModeApiProvider
 					? convertProtoToApiProvider(protoApiConfiguration.actModeApiProvider)
 					: undefined,
+				// Type cast for microsoftFoundryCloudEnvironment
+				microsoftFoundryCloudEnvironment: protoApiConfiguration.microsoftFoundryCloudEnvironment as
+					| "commercial"
+					| "government"
+					| "stack"
+					| undefined,
 			}
 
 			controller.stateManager.setApiConfiguration(convertedApiConfigurationFromProto)

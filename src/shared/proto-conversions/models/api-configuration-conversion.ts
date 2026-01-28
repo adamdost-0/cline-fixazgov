@@ -323,6 +323,8 @@ function convertApiProviderToProto(provider: string | undefined): ProtoApiProvid
 			return ProtoApiProvider.NOUSRESEARCH
 		case "openai-codex":
 			return ProtoApiProvider.OPENAI_CODEX
+		case "microsoft-foundry":
+			return ProtoApiProvider.MICROSOFT_FOUNDRY
 		default:
 			return ProtoApiProvider.ANTHROPIC
 	}
@@ -413,6 +415,8 @@ export function convertProtoToApiProvider(provider: ProtoApiProvider): ApiProvid
 			return "nousResearch"
 		case ProtoApiProvider.OPENAI_CODEX:
 			return "openai-codex"
+		case ProtoApiProvider.MICROSOFT_FOUNDRY:
+			return "microsoft-foundry"
 		default:
 			return "anthropic"
 	}
@@ -505,6 +509,12 @@ export function convertApiConfigurationToProto(config: ApiConfiguration): ProtoA
 		aihubmixAppCode: config.aihubmixAppCode,
 		hicapApiKey: config.hicapApiKey,
 		hicapModelId: config.hicapModelId,
+		microsoftFoundryEndpoint: config.microsoftFoundryEndpoint,
+		microsoftFoundryCloudEnvironment: config.microsoftFoundryCloudEnvironment,
+		microsoftFoundryUseIdentity: config.microsoftFoundryUseIdentity,
+		microsoftFoundryCustomScope: config.microsoftFoundryCustomScope,
+		microsoftFoundryApiVersion: config.microsoftFoundryApiVersion,
+		microsoftFoundryApiKey: config.microsoftFoundryApiKey,
 
 		// Plan mode configurations
 		planModeApiProvider: config.planModeApiProvider ? convertApiProviderToProto(config.planModeApiProvider) : undefined,
@@ -547,6 +557,8 @@ export function convertApiConfigurationToProto(config: ApiConfiguration): ProtoA
 		planModeNousResearchModelId: config.planModeNousResearchModelId,
 		planModeVercelAiGatewayModelId: config.planModeVercelAiGatewayModelId,
 		planModeVercelAiGatewayModelInfo: convertModelInfoToProtoOpenRouter(config.planModeVercelAiGatewayModelInfo),
+		planModeMicrosoftFoundryDeploymentId: config.planModeMicrosoftFoundryDeploymentId,
+		planModeMicrosoftFoundryModelInfo: convertModelInfoToProtoOpenRouter(config.planModeMicrosoftFoundryModelInfo),
 
 		// Act mode configurations
 		actModeApiProvider: config.actModeApiProvider ? convertApiProviderToProto(config.actModeApiProvider) : undefined,
@@ -589,6 +601,8 @@ export function convertApiConfigurationToProto(config: ApiConfiguration): ProtoA
 		actModeNousResearchModelId: config.actModeNousResearchModelId,
 		actModeVercelAiGatewayModelId: config.actModeVercelAiGatewayModelId,
 		actModeVercelAiGatewayModelInfo: convertModelInfoToProtoOpenRouter(config.actModeVercelAiGatewayModelInfo),
+		actModeMicrosoftFoundryDeploymentId: config.actModeMicrosoftFoundryDeploymentId,
+		actModeMicrosoftFoundryModelInfo: convertModelInfoToProtoOpenRouter(config.actModeMicrosoftFoundryModelInfo),
 	}
 }
 
@@ -679,6 +693,16 @@ export function convertProtoToApiConfiguration(protoConfig: ProtoApiConfiguratio
 		hicapApiKey: protoConfig.hicapApiKey,
 		hicapModelId: protoConfig.hicapModelId,
 		nousResearchApiKey: protoConfig.nousResearchApiKey,
+		microsoftFoundryEndpoint: protoConfig.microsoftFoundryEndpoint,
+		microsoftFoundryCloudEnvironment: protoConfig.microsoftFoundryCloudEnvironment as
+			| "commercial"
+			| "government"
+			| "stack"
+			| undefined,
+		microsoftFoundryUseIdentity: protoConfig.microsoftFoundryUseIdentity,
+		microsoftFoundryCustomScope: protoConfig.microsoftFoundryCustomScope,
+		microsoftFoundryApiVersion: protoConfig.microsoftFoundryApiVersion,
+		microsoftFoundryApiKey: protoConfig.microsoftFoundryApiKey,
 
 		// Plan mode configurations
 		planModeApiProvider:
@@ -724,6 +748,8 @@ export function convertProtoToApiConfiguration(protoConfig: ProtoApiConfiguratio
 		planModeNousResearchModelId: protoConfig.planModeNousResearchModelId,
 		planModeVercelAiGatewayModelId: protoConfig.planModeVercelAiGatewayModelId,
 		planModeVercelAiGatewayModelInfo: convertProtoToModelInfo(protoConfig.planModeVercelAiGatewayModelInfo),
+		planModeMicrosoftFoundryDeploymentId: protoConfig.planModeMicrosoftFoundryDeploymentId,
+		planModeMicrosoftFoundryModelInfo: convertProtoToModelInfo(protoConfig.planModeMicrosoftFoundryModelInfo),
 
 		// Act mode configurations
 		actModeApiProvider:
@@ -767,5 +793,7 @@ export function convertProtoToApiConfiguration(protoConfig: ProtoApiConfiguratio
 		actModeNousResearchModelId: protoConfig.actModeNousResearchModelId,
 		actModeVercelAiGatewayModelId: protoConfig.actModeVercelAiGatewayModelId,
 		actModeVercelAiGatewayModelInfo: convertProtoToModelInfo(protoConfig.actModeVercelAiGatewayModelInfo),
-	}
+		actModeMicrosoftFoundryDeploymentId: protoConfig.actModeMicrosoftFoundryDeploymentId,
+		actModeMicrosoftFoundryModelInfo: convertProtoToModelInfo(protoConfig.actModeMicrosoftFoundryModelInfo),
+	} as ApiConfiguration
 }

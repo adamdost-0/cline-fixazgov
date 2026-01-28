@@ -151,6 +151,7 @@ export function getModelsForProvider(
 		case "oca":
 		case "aihubmix":
 		case "together":
+		case "microsoft-foundry":
 		default:
 			return undefined
 	}
@@ -487,6 +488,20 @@ export function normalizeApiConfiguration(
 						? nousResearchModels[nousResearchModelId as keyof typeof nousResearchModels]
 						: nousResearchModels[nousResearchDefaultModelId],
 			}
+		case "microsoft-foundry":
+			const microsoftFoundryDeploymentId =
+				currentMode === "plan"
+					? apiConfiguration?.planModeMicrosoftFoundryDeploymentId
+					: apiConfiguration?.actModeMicrosoftFoundryDeploymentId
+			const microsoftFoundryModelInfo =
+				currentMode === "plan"
+					? apiConfiguration?.planModeMicrosoftFoundryModelInfo
+					: apiConfiguration?.actModeMicrosoftFoundryModelInfo
+			return {
+				selectedProvider: provider,
+				selectedModelId: microsoftFoundryDeploymentId || "",
+				selectedModelInfo: microsoftFoundryModelInfo || openAiModelInfoSaneDefaults,
+			}
 		default:
 			return getProviderData(anthropicModels, anthropicDefaultModelId)
 	}
@@ -522,6 +537,7 @@ export function getModeSpecificFields(apiConfiguration: ApiConfiguration | undef
 			aihubmixModelId: undefined,
 			nousResearchModelId: undefined,
 			vercelAiGatewayModelId: undefined,
+			microsoftFoundryDeploymentId: undefined,
 
 			// Model info objects
 			openAiModelInfo: undefined,
@@ -533,6 +549,7 @@ export function getModeSpecificFields(apiConfiguration: ApiConfiguration | undef
 			huggingFaceModelInfo: undefined,
 			vsCodeLmModelSelector: undefined,
 			aihubmixModelInfo: undefined,
+			microsoftFoundryModelInfo: undefined,
 
 			// AWS Bedrock fields
 			awsBedrockCustomSelected: undefined,
@@ -575,6 +592,10 @@ export function getModeSpecificFields(apiConfiguration: ApiConfiguration | undef
 			mode === "plan" ? apiConfiguration.planModeNousResearchModelId : apiConfiguration.actModeNousResearchModelId,
 		vercelAiGatewayModelId:
 			mode === "plan" ? apiConfiguration.planModeVercelAiGatewayModelId : apiConfiguration.actModeVercelAiGatewayModelId,
+		microsoftFoundryDeploymentId:
+			mode === "plan"
+				? apiConfiguration.planModeMicrosoftFoundryDeploymentId
+				: apiConfiguration.actModeMicrosoftFoundryDeploymentId,
 
 		// Model info objects
 		openAiModelInfo: mode === "plan" ? apiConfiguration.planModeOpenAiModelInfo : apiConfiguration.actModeOpenAiModelInfo,
@@ -596,6 +617,10 @@ export function getModeSpecificFields(apiConfiguration: ApiConfiguration | undef
 			mode === "plan"
 				? apiConfiguration.planModeVercelAiGatewayModelInfo
 				: apiConfiguration.actModeVercelAiGatewayModelInfo,
+		microsoftFoundryModelInfo:
+			mode === "plan"
+				? apiConfiguration.planModeMicrosoftFoundryModelInfo
+				: apiConfiguration.actModeMicrosoftFoundryModelInfo,
 
 		// AWS Bedrock fields
 		awsBedrockCustomSelected:
@@ -780,6 +805,13 @@ export async function syncModeConfigurations(
 			updates.planModeAihubmixModelInfo = sourceFields.aihubmixModelInfo
 			updates.actModeAihubmixModelId = sourceFields.aihubmixModelId
 			updates.actModeAihubmixModelInfo = sourceFields.aihubmixModelInfo
+			break
+
+		case "microsoft-foundry":
+			updates.planModeMicrosoftFoundryDeploymentId = sourceFields.microsoftFoundryDeploymentId
+			updates.planModeMicrosoftFoundryModelInfo = sourceFields.microsoftFoundryModelInfo
+			updates.actModeMicrosoftFoundryDeploymentId = sourceFields.microsoftFoundryDeploymentId
+			updates.actModeMicrosoftFoundryModelInfo = sourceFields.microsoftFoundryModelInfo
 			break
 
 		// Providers that use apiProvider + apiModelId fields
