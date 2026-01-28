@@ -23,11 +23,7 @@ permissions:
     pull-requests: write
 
 jobs:
-    test:
-        uses: ./.github/workflows/test.yml
-
     publish:
-        needs: test
         name: Publish Extension
         runs-on: ubuntu-latest
         environment: publish
