@@ -331,7 +331,7 @@ export const MicrosoftFoundryProvider = ({ showModelOptions, isPopup, currentMod
 			setDeployments(discoveredDeployments)
 
 			if (discoveredDeployments.length === 0) {
-				setDiscoveryError("No deployments found. Deploy a model in Azure AI Foundry first, then click Refresh.")
+				setDiscoveryError("No deployments found. Deploy a model in Microsoft Foundry first, then click Refresh.")
 			}
 		} catch (error: unknown) {
 			console.error("Deployment discovery failed:", error)
