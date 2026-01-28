@@ -100,6 +100,7 @@ message Secrets {
   optional string oca_api_key = 41;
   optional string oca_refresh_token = 42;
   optional string mcp_o_auth_secrets = 43;
+  optional string microsoft_foundry_api_key = 44;
 }
 
 // NOTE: Add new fields under API_HANDLER_SETTINGS_FIELDS or USER_SETTINGS_FIELDS
@@ -277,6 +278,15 @@ message Settings {
   optional int32 open_telemetry_log_max_queue_size = 171;
   optional bool worktrees_enabled = 172;
   map<string, string> open_ai_headers = 173;
+  optional string microsoft_foundry_endpoint = 174;
+  optional string microsoft_foundry_cloud_environment = 175;
+  optional bool microsoft_foundry_use_identity = 176;
+  optional string microsoft_foundry_custom_scope = 177;
+  optional string microsoft_foundry_api_version = 178;
+  optional string plan_mode_microsoft_foundry_deployment_id = 179;
+  optional OpenRouterModelInfo plan_mode_microsoft_foundry_model_info = 180;
+  optional string act_mode_microsoft_foundry_deployment_id = 181;
+  optional OpenRouterModelInfo act_mode_microsoft_foundry_model_info = 182;
 }
 
 message DictationSettings {

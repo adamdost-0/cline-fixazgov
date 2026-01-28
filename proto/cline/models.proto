@@ -51,6 +51,8 @@ service ModelsService {
   rpc getAihubmixModels(EmptyRequest) returns (OpenRouterCompatibleModelInfo);
   // Refreshes and returns Vercel AI Gateway models
   rpc refreshVercelAiGatewayModelsRpc(EmptyRequest) returns (OpenRouterCompatibleModelInfo);
+  // Fetches deployed models from Microsoft Foundry (Azure AI)
+  rpc getMicrosoftFoundryDeployments(MicrosoftFoundryDeploymentsRequest) returns (MicrosoftFoundryDeploymentsResponse);
 }
 
 // List of VS Code LM models
@@ -660,4 +662,22 @@ message ModelsApiConfiguration {
   optional OpenAiCompatibleModelInfo act_mode_aihubmix_model_info = 237;
   optional string act_mode_nous_research_model_id = 238;
   optional string gemini_act_mode_thinking_level = 239;
+}
+
+// Request for Microsoft Foundry deployments discovery
+message MicrosoftFoundryDeploymentsRequest {
+  string endpoint = 1;  // The Azure OpenAI endpoint URL
+}
+
+// A single Microsoft Foundry deployment
+message MicrosoftFoundryDeployment {
+  string id = 1;          // Deployment name/ID
+  string model = 2;       // Model name
+  string model_version = 3;  // Model version
+}
+
+// Response containing Microsoft Foundry deployments
+message MicrosoftFoundryDeploymentsResponse {
+  repeated MicrosoftFoundryDeployment deployments = 1;
+  optional string error = 2;  // Error message if discovery failed
 }

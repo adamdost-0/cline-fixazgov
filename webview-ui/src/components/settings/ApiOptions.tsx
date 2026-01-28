@@ -31,6 +31,7 @@ import { HuaweiCloudMaasProvider } from "./providers/HuaweiCloudMaasProvider"
 import { HuggingFaceProvider } from "./providers/HuggingFaceProvider"
 import { LiteLlmProvider } from "./providers/LiteLlmProvider"
 import { LMStudioProvider } from "./providers/LMStudioProvider"
+import { MicrosoftFoundryProvider } from "./providers/MicrosoftFoundryProvider"
 import { MinimaxProvider } from "./providers/MiniMaxProvider"
 import { MistralProvider } from "./providers/MistralProvider"
 import { MoonshotProvider } from "./providers/MoonshotProvider"
@@ -500,6 +501,10 @@ const ApiOptions = ({ showModelOptions, apiErrorMessage, modelIdErrorMessage, is
 
 			{apiConfiguration && selectedProvider === "aihubmix" && (
 				<AIhubmixProvider currentMode={currentMode} isPopup={isPopup} showModelOptions={showModelOptions} />
+			)}
+
+			{apiConfiguration && selectedProvider === "microsoft-foundry" && (
+				<MicrosoftFoundryProvider currentMode={currentMode} isPopup={isPopup} showModelOptions={showModelOptions} />
 			)}
 
 			{apiErrorMessage && (

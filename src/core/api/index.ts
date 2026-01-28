@@ -22,6 +22,7 @@ import { HuaweiCloudMaaSHandler } from "./providers/huawei-cloud-maas"
 import { HuggingFaceHandler } from "./providers/huggingface"
 import { LiteLlmHandler } from "./providers/litellm"
 import { LmStudioHandler } from "./providers/lmstudio"
+import { MicrosoftFoundryHandler } from "./providers/microsoft-foundry"
 import { MinimaxHandler } from "./providers/minimax"
 import { MistralHandler } from "./providers/mistral"
 import { MoonshotHandler } from "./providers/moonshot"
@@ -443,6 +444,20 @@ function createHandlerForProvider(
 				onRetryAttempt: options.onRetryAttempt,
 				nousResearchApiKey: options.nousResearchApiKey,
 				apiModelId: mode === "plan" ? options.planModeNousResearchModelId : options.actModeNousResearchModelId,
+			})
+		case "microsoft-foundry":
+			return new MicrosoftFoundryHandler({
+				onRetryAttempt: options.onRetryAttempt,
+				microsoftFoundryEndpoint: options.microsoftFoundryEndpoint,
+				microsoftFoundryApiKey: options.microsoftFoundryApiKey,
+				microsoftFoundryDeploymentId:
+					mode === "plan" ? options.planModeMicrosoftFoundryDeploymentId : options.actModeMicrosoftFoundryDeploymentId,
+				microsoftFoundryCloudEnvironment: options.microsoftFoundryCloudEnvironment,
+				microsoftFoundryUseIdentity: options.microsoftFoundryUseIdentity,
+				microsoftFoundryCustomScope: options.microsoftFoundryCustomScope,
+				microsoftFoundryApiVersion: options.microsoftFoundryApiVersion,
+				microsoftFoundryModelInfo:
+					mode === "plan" ? options.planModeMicrosoftFoundryModelInfo : options.actModeMicrosoftFoundryModelInfo,
 			})
 		default:
 			return new AnthropicHandler({

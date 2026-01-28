@@ -135,6 +135,13 @@ const API_HANDLER_SETTINGS_FIELDS = {
 	aihubmixBaseUrl: { default: undefined as string | undefined },
 	aihubmixAppCode: { default: undefined as string | undefined },
 
+	// Microsoft Foundry configuration
+	microsoftFoundryEndpoint: { default: undefined as string | undefined },
+	microsoftFoundryCloudEnvironment: { default: "commercial" as "commercial" | "government" | "stack" },
+	microsoftFoundryUseIdentity: { default: true as boolean },
+	microsoftFoundryCustomScope: { default: undefined as string | undefined },
+	microsoftFoundryApiVersion: { default: undefined as string | undefined },
+
 	// Plan mode configurations
 	planModeApiModelId: { default: undefined as string | undefined },
 	planModeThinkingBudgetTokens: { default: undefined as number | undefined },
@@ -176,6 +183,8 @@ const API_HANDLER_SETTINGS_FIELDS = {
 	planModeNousResearchModelId: { default: undefined as string | undefined },
 	planModeVercelAiGatewayModelId: { default: undefined as string | undefined },
 	planModeVercelAiGatewayModelInfo: { default: undefined as ModelInfo | undefined },
+	planModeMicrosoftFoundryDeploymentId: { default: undefined as string | undefined },
+	planModeMicrosoftFoundryModelInfo: { default: undefined as ModelInfo | undefined },
 
 	// Act mode configurations
 	actModeApiModelId: { default: undefined as string | undefined },
@@ -218,6 +227,8 @@ const API_HANDLER_SETTINGS_FIELDS = {
 	actModeNousResearchModelId: { default: undefined as string | undefined },
 	actModeVercelAiGatewayModelId: { default: undefined as string | undefined },
 	actModeVercelAiGatewayModelInfo: { default: undefined as ModelInfo | undefined },
+	actModeMicrosoftFoundryDeploymentId: { default: undefined as string | undefined },
+	actModeMicrosoftFoundryModelInfo: { default: undefined as ModelInfo | undefined },
 
 	// Model-specific settings
 	planModeApiProvider: { default: DEFAULT_API_PROVIDER as ApiProvider },
@@ -339,6 +350,7 @@ const SECRETS_KEYS = [
 	"ocaApiKey",
 	"ocaRefreshToken",
 	"mcpOAuthSecrets",
+	"microsoftFoundryApiKey",
 ] as const
 
 export const LocalStateKeys = [
