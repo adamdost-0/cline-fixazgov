@@ -1,0 +1,272 @@
+---
+title: "API Key Authentication"
+sidebarTitle: "API Key"
+description: "Configure Microsoft Foundry with API key authentication for service accounts and automation scenarios."
+---
+
+### Overview
+
+API key authentication provides a simple way to connect Cline to Azure AI Foundry. This method is best for:
+
+- Service accounts and automation
+- CI/CD pipelines
+- Environments where Azure CLI isn't available
+- Quick testing and evaluation
+
+<Warning>
+**Security Notice:** API keys provide full access to your Azure AI Foundry resource. For developer workstations, consider using [Azure Identity authentication](./azure-identity) instead.
+</Warning>
+
+---
+
+### Prerequisites
+
+Before configuring Cline, ensure you have:
+
+1. **Azure Subscription** with an Azure AI Foundry resource
+2. **Deployed Model** in your Azure AI Foundry project
+3. **Key management access** to the Azure OpenAI resource
+
+---
+
+### Step 1: Get Your API Key
+
+<Tabs>
+  <Tab title="Azure Portal">
+    1. Go to the [Azure Portal](https://portal.azure.com)
+    2. Navigate to your **Azure OpenAI** resource
+    3. Select **Keys and Endpoint** under Resource Management
+    4. Copy **KEY 1** or **KEY 2**
+    
+    <Frame>
+      <img src="/assets/azure-openai-keys.png" alt="Azure OpenAI Keys and Endpoint page" />
+    </Frame>
+  </Tab>
+  <Tab title="Azure CLI">
+    ```bash
+    az cognitiveservices account keys list \
+      --name {your-resource-name} \
+      --resource-group {your-resource-group}
+    ```
+    
+    Output:
+    ```json
+    {
+      "key1": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "key2": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    }
+    ```
+  </Tab>
+  <Tab title="Azure AI Foundry Portal">
+    1. Go to [Azure AI Foundry](https://ai.azure.com)
+    2. Select your project
+    3. Navigate to **Settings** → **Connections**
+    4. Find your Azure OpenAI connection
+    5. Click to view connection details and copy the key
+  </Tab>
+</Tabs>
+
+---
+
+### Step 2: Get Your Endpoint URL
+
+Your endpoint URL follows this format:
+
+**Azure Commercial:**
+```
+https://{resource-name}.openai.azure.com
+```
+or
+```
+https://{resource-name}.cognitiveservices.azure.com
+```
+
+**Azure Government:**
+```
+https://{resource-name}.openai.azure.us
+```
+
+<Tip>
+Both `.openai.azure.com` and `.cognitiveservices.azure.com` endpoints work. The cognitive services endpoint is the newer format.
+</Tip>
+
+---
+
+### Step 3: Configure Cline
+
+1. **Open Cline Settings**
+   - Click the settings gear ⚙️ in the Cline panel
+
+2. **Select Microsoft Foundry**
+   - Choose **Microsoft Foundry** from the API Provider dropdown
+
+3. **Enter Endpoint URL**
+   - Paste your Azure AI Foundry endpoint
+
+4. **Select Cloud Environment**
+   - Choose **Commercial**, **Government**, or **Stack**
+
+5. **Enter API Key**
+   - Paste your API key (KEY 1 or KEY 2)
+   - Ensure **Use Azure Identity** is unchecked
+
+6. **Discover Deployments**
+   - Click **Discover Deployments** to fetch available models
+
+7. **Select a Deployment**
+   - Choose your desired model from the dropdown
+
+
+
+---
+
+### Step 4: Test the Connection
+
+Send a test message in Cline:
+
+```
+Hello! Can you confirm you're connected through Azure AI Foundry?
+```
+
+If successful, you'll see a response from your deployed model.
+
+---
+
+### API Key Security
+
+<AccordionGroup>
+  <Accordion title="Rotate Keys Regularly">
+    Azure provides two keys so you can rotate without downtime:
+    
+    1. Update applications to use KEY 2
+    2. Regenerate KEY 1 in Azure Portal
+    3. Update applications to use new KEY 1
+    4. Regenerate KEY 2
+    
+    ```bash
+    # Regenerate key1
+    az cognitiveservices account keys regenerate \
+      --name {resource-name} \
+      --resource-group {resource-group} \
+      --key-name key1
+    ```
+  </Accordion>
+  
+  <Accordion title="Use Key Vault for Production">
+    Store API keys in Azure Key Vault for production environments:
+    
+    ```bash
+    # Store key in Key Vault
+    az keyvault secret set \
+      --vault-name {vault-name} \
+      --name "azure-openai-key" \
+      --value "{your-api-key}"
+    ```
+    
+    Then reference the Key Vault secret in your applications.
+  </Accordion>
+  
+  <Accordion title="Restrict Network Access">
+    Limit API key exposure by restricting network access:
+    
+    1. Go to Azure Portal → Your OpenAI resource
+    2. Select **Networking**
+    3. Configure **Private endpoints** or **Selected networks**
+  </Accordion>
+  
+  <Accordion title="Monitor Key Usage">
+    Enable diagnostic logging to track API key usage:
+    
+    1. Go to Azure Portal → Your OpenAI resource
+    2. Select **Diagnostic settings**
+    3. Add a setting to send logs to Log Analytics
+    4. Query for authentication events
+  </Accordion>
+</AccordionGroup>
+
+---
+
+### Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="'401 Unauthorized' error">
+    Your API key is invalid or incorrect. Verify:
+    
+    1. Copy the key again from Azure Portal (watch for extra spaces)
+    2. Check you're using the correct resource's key
+    3. Ensure the key hasn't been regenerated
+  </Accordion>
+  
+  <Accordion title="'403 Forbidden' error">
+    Access is denied. Common causes:
+    
+    - Network restrictions blocking your IP
+    - Resource firewall rules
+    - Subscription quota exceeded
+    
+    Check the resource's **Networking** settings in Azure Portal.
+  </Accordion>
+  
+  <Accordion title="'404 Not Found' for deployment">
+    The deployment doesn't exist or name is wrong:
+    
+    1. Verify deployment exists in Azure AI Foundry
+    2. Check deployment name is exact (case-sensitive)
+    3. Ensure deployment is complete (not still provisioning)
+  </Accordion>
+  
+  <Accordion title="'429 Too Many Requests' error">
+    You've exceeded rate limits:
+    
+    1. Wait a moment and retry
+    2. Check your quota in Azure Portal
+    3. Request quota increase if needed
+  </Accordion>
+</AccordionGroup>
+
+---
+
+### API Version
+
+Microsoft Foundry uses the Azure OpenAI API. The default API version is:
+
+```
+2024-08-01-preview
+```
+
+To use a different API version, enter it in the **API Version** field in Cline settings. Available versions include:
+
+| Version | Status | Notes |
+|---------|--------|-------|
+| `2024-08-01-preview` | Latest | Default, full feature support |
+| `2024-06-01` | GA | Stable, recommended for production |
+| `2024-02-01` | GA | Older stable version |
+
+<Note>
+Preview API versions may include features not yet generally available but might change without notice.
+</Note>
+
+---
+
+### Request Headers
+
+When using API key authentication, Cline sends:
+
+```http
+POST https://{endpoint}/openai/deployments/{deployment}/chat/completions?api-version=2024-08-01-preview
+api-key: {your-api-key}
+Content-Type: application/json
+```
+
+---
+
+### Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Azure Identity Authentication" icon="user-shield" href="./azure-identity">
+    More secure authentication for developer workstations.
+  </Card>
+  <Card title="Troubleshooting Guide" icon="wrench" href="./troubleshooting">
+    Detailed solutions for common issues.
+  </Card>
+</CardGroup>

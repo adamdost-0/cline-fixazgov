@@ -515,6 +515,7 @@ export function convertApiConfigurationToProto(config: ApiConfiguration): ProtoA
 		microsoftFoundryCustomScope: config.microsoftFoundryCustomScope,
 		microsoftFoundryApiVersion: config.microsoftFoundryApiVersion,
 		microsoftFoundryApiKey: config.microsoftFoundryApiKey,
+		microsoftFoundryArmEndpoint: config.microsoftFoundryArmEndpoint,
 
 		// Plan mode configurations
 		planModeApiProvider: config.planModeApiProvider ? convertApiProviderToProto(config.planModeApiProvider) : undefined,
@@ -703,6 +704,7 @@ export function convertProtoToApiConfiguration(protoConfig: ProtoApiConfiguratio
 		microsoftFoundryCustomScope: protoConfig.microsoftFoundryCustomScope,
 		microsoftFoundryApiVersion: protoConfig.microsoftFoundryApiVersion,
 		microsoftFoundryApiKey: protoConfig.microsoftFoundryApiKey,
+		microsoftFoundryArmEndpoint: protoConfig.microsoftFoundryArmEndpoint,
 
 		// Plan mode configurations
 		planModeApiProvider:

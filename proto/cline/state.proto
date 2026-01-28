@@ -277,7 +277,6 @@ message Settings {
   optional int32 open_telemetry_log_batch_timeout = 170;
   optional int32 open_telemetry_log_max_queue_size = 171;
   optional bool worktrees_enabled = 172;
-  map<string, string> open_ai_headers = 173;
   optional string microsoft_foundry_endpoint = 174;
   optional string microsoft_foundry_cloud_environment = 175;
   optional bool microsoft_foundry_use_identity = 176;
@@ -287,6 +286,8 @@ message Settings {
   optional OpenRouterModelInfo plan_mode_microsoft_foundry_model_info = 180;
   optional string act_mode_microsoft_foundry_deployment_id = 181;
   optional OpenRouterModelInfo act_mode_microsoft_foundry_model_info = 182;
+  map<string, string> open_ai_headers = 183;
+  optional string microsoft_foundry_arm_endpoint = 184;
 }
 
 message DictationSettings {

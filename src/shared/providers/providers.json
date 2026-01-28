@@ -29,6 +29,10 @@
 			"label": "GitHub Copilot"
 		},
 		{
+			"value": "microsoft-foundry",
+			"label": "Microsoft Foundry"
+		},
+		{
 			"value": "deepseek",
 			"label": "DeepSeek"
 		},
@@ -163,10 +167,6 @@
 		{
 			"value": "nousResearch",
 			"label": "NousResearch"
-		},
-		{
-			"value": "microsoft-foundry",
-			"label": "Microsoft Foundry"
 		}
 	]
 }

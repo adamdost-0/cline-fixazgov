@@ -597,6 +597,7 @@ message ModelsApiConfiguration {
   optional string microsoft_foundry_custom_scope = 90;
   optional string microsoft_foundry_api_version = 91;
   optional string microsoft_foundry_api_key = 92;
+  optional string microsoft_foundry_arm_endpoint = 93;
 
   // Plan mode configurations
   optional ApiProvider plan_mode_api_provider = 100;
@@ -690,6 +691,7 @@ message ModelsApiConfiguration {
 // Request for Microsoft Foundry deployments discovery
 message MicrosoftFoundryDeploymentsRequest {
   string endpoint = 1;  // The Azure OpenAI endpoint URL
+  optional string arm_endpoint = 2; // Optional ARM Endpoint Override (Stack)
 }
 
 // A single Microsoft Foundry deployment

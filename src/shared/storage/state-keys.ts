@@ -137,6 +137,7 @@ const API_HANDLER_SETTINGS_FIELDS = {
 
 	// Microsoft Foundry configuration
 	microsoftFoundryEndpoint: { default: undefined as string | undefined },
+	microsoftFoundryArmEndpoint: { default: undefined as string | undefined },
 	microsoftFoundryCloudEnvironment: { default: "commercial" as "commercial" | "government" | "stack" },
 	microsoftFoundryUseIdentity: { default: true as boolean },
 	microsoftFoundryCustomScope: { default: undefined as string | undefined },

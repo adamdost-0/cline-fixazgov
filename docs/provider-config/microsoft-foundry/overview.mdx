@@ -1,0 +1,155 @@
+---
+title: "Microsoft Foundry Overview"
+sidebarTitle: "Overview"
+description: "Connect Cline to Azure AI Foundry for access to GPT-5, Claude, Phi-4, Llama, and other frontier models with enterprise-grade security and compliance."
+---
+
+### Overview
+
+**Microsoft Foundry** provides access to Azure AI Foundry (formerly Azure OpenAI Service), enabling Cline to use frontier AI models deployed in your Azure environment with enterprise-grade security, compliance, and governance.
+
+**Supported Clouds:**
+- **Azure Commercial** — Public Azure cloud
+- **Azure Government** — US Government cloud (FedRAMP High, DoD IL4/IL5)
+- **Azure Stack** — On-premises and edge deployments
+
+**Commercial Website:** [Azure AI Foundry](https://ai.azure.com)
+**Government Website:** [Azure Government AI](https://ai.azure.us)
+
+---
+
+### Why Use Microsoft Foundry?
+
+| Feature | Benefit |
+|---------|---------|
+| **Enterprise Security** | Data stays in your Azure tenant with private endpoints, VNET integration, and customer-managed keys |
+| **Compliance** | SOC 2, HIPAA, FedRAMP, and government cloud support |
+| **Azure Identity** | Use your existing Azure CLI login — no separate API keys required |
+| **Model Variety** | Access OpenAI models (GPT-5, GPT-4o), Claude, Llama, Phi, Mistral, and more |
+| **Cost Control** | Provisioned throughput, token quotas, and Azure billing integration |
+
+---
+
+### Supported Models
+
+Microsoft Foundry supports any model deployed to your Azure AI Foundry resource, including:
+
+**OpenAI Models:**
+- GPT-5.2, GPT-5.2-chat, GPT-5-mini, GPT-5-nano
+- GPT-4o, GPT-4o-mini, GPT-4-turbo
+- o3, o4-mini (reasoning models)
+
+**Anthropic Claude (via Azure):**
+- Claude Sonnet 4.5, Claude Opus 4, Claude Haiku 4
+
+**Open Source Models:**
+- Phi-4, Phi-4-mini, Phi-4-multimodal
+- Llama 3.3 70B, Llama 4
+- Mistral Medium, DeepSeek V3
+
+<Note>
+Model availability depends on your Azure region and deployment configuration. Check the [Azure AI Foundry Model Catalog](https://ai.azure.com/explore/models) for current availability.
+</Note>
+
+---
+
+### Authentication Methods
+
+Microsoft Foundry supports two authentication methods:
+
+<CardGroup cols={2}>
+  <Card title="Azure Identity (Recommended)" icon="user-shield" href="./azure-identity">
+    Use your Azure CLI login with zero API key management. Best for developers and secure environments.
+  </Card>
+  <Card title="API Key" icon="key" href="./api-key">
+    Traditional API key authentication. Best for service accounts and automation.
+  </Card>
+</CardGroup>
+
+---
+
+### Quick Start
+
+#### Prerequisites
+
+1. **Azure Subscription** with an Azure AI Foundry resource
+2. **Deployed Model** in your Azure AI Foundry project
+3. **Azure CLI** installed (for Azure Identity auth) or an API key
+
+#### Get Your Endpoint URL
+
+1. Go to [Azure AI Foundry](https://ai.azure.com)
+2. Select your project
+3. Navigate to **Deployments**
+4. Copy the **Target URI** (e.g., `https://your-resource.cognitiveservices.azure.com`)
+
+<Frame>
+  <img src="/assets/azure-foundry-endpoint.png" alt="Finding your Azure AI Foundry endpoint" />
+</Frame>
+
+#### Configure Cline
+
+1. Open Cline in VS Code
+2. Click the settings gear ⚙️
+3. Select **Microsoft Foundry** from the API Provider dropdown
+4. Enter your **Endpoint URL**
+5. Choose your **Cloud Environment** (Commercial, Government, or Stack)
+6. Select your authentication method
+7. Click **Discover Deployments** to find available models
+8. Select your deployment and start coding!
+
+---
+
+### Cloud Environments
+
+<Tabs>
+  <Tab title="Commercial">
+    **Azure Commercial** is the standard public Azure cloud.
+    
+    - **Audience Scope:** `https://cognitiveservices.azure.com/.default`
+    - **Endpoint Format:** `https://{resource-name}.cognitiveservices.azure.com`
+    - **Regions:** All standard Azure regions
+  </Tab>
+  <Tab title="Government">
+    **Azure Government** is the US Government cloud with enhanced compliance.
+    
+    - **Audience Scope:** `https://cognitiveservices.azure.us/.default`
+    - **Endpoint Format:** `https://{resource-name}.cognitiveservices.azure.us`
+    - **Compliance:** FedRAMP High, DoD IL4/IL5, CJIS, IRS 1075
+    - **Regions:** US Gov Arizona, US Gov Virginia, US Gov Texas
+    
+    <Warning>
+    Azure Government requires an approved government tenant. Contact your Azure administrator for access.
+    </Warning>
+  </Tab>
+  <Tab title="Stack">
+    **Azure Stack** enables on-premises and edge deployments.
+    
+    - **Audience Scope:** Custom (configured by your administrator)
+    - **Endpoint Format:** Varies by deployment
+    - **Use Case:** Air-gapped environments, data sovereignty requirements
+    
+    <Note>
+    Azure Stack requires a custom audience scope configured in your Cline settings.
+    </Note>
+  </Tab>
+</Tabs>
+
+---
+
+### Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Azure Identity Setup" icon="terminal" href="./azure-identity">
+    Configure Azure CLI authentication for secure, keyless access.
+  </Card>
+  <Card title="API Key Setup" icon="key" href="./api-key">
+    Set up API key authentication for service accounts.
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="./troubleshooting">
+    Common issues and solutions for Microsoft Foundry.
+  </Card>
+  <Card title="Best Practices" icon="shield-check" href="./best-practices">
+    Security and performance recommendations.
+  </Card>
+</CardGroup>

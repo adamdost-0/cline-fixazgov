@@ -218,6 +218,15 @@
 											"provider-config/aws-bedrock/iam-credentials",
 											"provider-config/aws-bedrock/cli-profile"
 										]
+									},
+									{
+										"group": "Microsoft Foundry",
+										"pages": [
+											"provider-config/microsoft-foundry/overview",
+											"provider-config/microsoft-foundry/azure-identity",
+											"provider-config/microsoft-foundry/api-key",
+											"provider-config/microsoft-foundry/troubleshooting"
+										]
 									}
 								]
 							},

@@ -1,0 +1,404 @@
+---
+title: "Troubleshooting"
+sidebarTitle: "Troubleshooting"
+description: "Common issues and solutions when using Microsoft Foundry with Cline."
+---
+
+### Quick Diagnostics
+
+Before diving into specific issues, run through this checklist:
+
+<Steps>
+  <Step title="Verify Azure CLI Login">
+    ```bash
+    az account show
+    ```
+    Should display your current subscription.
+  </Step>
+  <Step title="Check Endpoint URL">
+    Ensure your endpoint doesn't have a trailing slash and uses the correct domain:
+    - ✅ `https://my-resource.cognitiveservices.azure.com`
+    - ❌ `https://my-resource.cognitiveservices.azure.com/`
+    - ❌ `https://my-resource.openai.azure.com/openai`
+  </Step>
+  <Step title="Verify Deployment Exists">
+    ```bash
+    az cognitiveservices account deployment list \
+      --name {resource-name} \
+      --resource-group {resource-group}
+    ```
+  </Step>
+  <Step title="Test API Directly">
+    ```bash
+    curl "https://{endpoint}/openai/deployments/{deployment}/chat/completions?api-version=2024-08-01-preview" \
+      -H "api-key: {your-key}" \
+      -H "Content-Type: application/json" \
+      -d '{"messages":[{"role":"user","content":"Hello"}]}'
+    ```
+  </Step>
+</Steps>
+
+---
+
+### Authentication Errors
+
+<AccordionGroup>
+  <Accordion title="Azure CLI session expired or not authenticated">
+    **Error Message:**
+    ```
+    Azure CLI session expired or not authenticated. Run `az login` to re-authenticate, then try again.
+    ```
+    
+    **Solution:**
+    1. Open a terminal
+    2. Run `az login`
+    3. Complete browser authentication
+    4. Retry in Cline
+    
+    **For Azure Government:**
+    ```bash
+    az cloud set --name AzureUSGovernment
+    az login
+    ```
+  </Accordion>
+  
+  <Accordion title="Invalid API key">
+    **Error Message:**
+    ```
+    Invalid API key. Please verify your Microsoft Foundry API key is correct.
+    ```
+    
+    **Solution:**
+    1. Go to Azure Portal → Your OpenAI resource → Keys and Endpoint
+    2. Copy the key again (ensure no extra whitespace)
+    3. Paste in Cline settings
+    
+    **Verification:**
+    ```bash
+    curl -I "https://{endpoint}/openai/deployments?api-version=2024-08-01-preview" \
+      -H "api-key: {your-key}"
+    # Should return 200 OK
+    ```
+  </Accordion>
+  
+  <Accordion title="Insufficient permissions (403 Forbidden)">
+    **Error Message:**
+    ```
+    Insufficient permissions. Ensure your account has the 'Cognitive Services User' role assigned for this resource.
+    ```
+    
+    **Solution:**
+    
+    Check your role assignment:
+    ```bash
+    az role assignment list --assignee $(az ad signed-in-user show --query id -o tsv) --all
+    ```
+    
+    Required role (ask your Azure admin):
+    ```bash
+    az role assignment create \
+      --role "Cognitive Services User" \
+      --assignee {user-principal-name} \
+      --scope /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.CognitiveServices/accounts/{resource}
+    ```
+  </Accordion>
+  
+  <Accordion title="AADSTS errors (Azure AD issues)">
+    **Common AADSTS Errors:**
+    
+    | Code | Meaning | Solution |
+    |------|---------|----------|
+    | AADSTS50076 | MFA required | Complete MFA or use `az login --use-device-code` |
+    | AADSTS50079 | User action required | Complete security review in Azure portal |
+    | AADSTS53003 | Conditional access blocked | Contact IT for policy exception |
+    | AADSTS700016 | Application not found | Ensure Azure CLI is installed correctly |
+    
+    **Device Code Flow (Alternative):**
+    ```bash
+    az login --use-device-code
+    ```
+    This provides a code to enter at https://microsoft.com/devicelogin
+  </Accordion>
+</AccordionGroup>
+
+---
+
+### Deployment Errors
+
+<AccordionGroup>
+  <Accordion title="Deployment not found">
+    **Error Message:**
+    ```
+    Deployment 'my-deployment' not found. Verify that:
+    1. The deployment exists in your Azure AI Foundry project
+    2. The deployment name is spelled correctly
+    3. The model has been deployed (not just available in the catalog)
+    ```
+    
+    **Solution:**
+    
+    List your deployments:
+    ```bash
+    az cognitiveservices account deployment list \
+      --name {resource-name} \
+      --resource-group {resource-group} \
+      --output table
+    ```
+    
+    Verify the deployment name matches exactly (case-sensitive).
+  </Accordion>
+  
+  <Accordion title="No deployments discovered">
+    **Issue:** The "Discover Deployments" button returns no results.
+    
+    **Causes:**
+    1. No models deployed to the resource
+    2. Wrong endpoint URL
+    3. Authentication not configured correctly
+    
+    **Solution:**
+    
+    1. Check Azure AI Foundry portal for deployments
+    2. Deploy a model if none exist:
+       ```bash
+       az cognitiveservices account deployment create \
+         --name {resource-name} \
+         --resource-group {resource-group} \
+         --deployment-name "gpt-4o" \
+         --model-name "gpt-4o" \
+         --model-version "2024-08-06" \
+         --model-format OpenAI \
+         --sku-capacity 10 \
+         --sku-name "Standard"
+       ```
+  </Accordion>
+  
+  <Accordion title="Model not available in region">
+    **Error:** Model deployment fails or isn't available.
+    
+    **Solution:**
+    
+    Check model availability by region:
+    ```bash
+    az cognitiveservices account list-models \
+      --name {resource-name} \
+      --resource-group {resource-group} \
+      --output table
+    ```
+    
+    Consider creating a resource in a different region with better model availability.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+### Request Errors
+
+<AccordionGroup>
+  <Accordion title="Temperature not supported">
+    **Error Message:**
+    ```
+    Unsupported value: 'temperature' does not support 0.7 with this model. Only the default (1) value is supported.
+    ```
+    
+    **Cause:** Some models (like GPT-5.x) don't support custom temperature values.
+    
+    **Solution:** This is automatically handled by Cline. If you see this error, ensure you're using the latest version of Cline.
+  </Accordion>
+  
+  <Accordion title="Rate limit exceeded (429)">
+    **Error Message:**
+    ```
+    Rate limit exceeded. Please wait a moment and try again, or request a quota increase for your Azure OpenAI resource.
+    ```
+    
+    **Solutions:**
+    
+    1. **Wait and retry** — Rate limits reset over time
+    2. **Check quota usage:**
+       ```bash
+       az cognitiveservices usage list --location {region}
+       ```
+    3. **Request quota increase** — Azure Portal → Quotas
+    4. **Use provisioned throughput** — For consistent capacity
+  </Accordion>
+  
+  <Accordion title="Content filter triggered">
+    **Error Message:**
+    ```
+    Content was filtered due to Azure OpenAI content management policy.
+    ```
+    
+    **Solutions:**
+    
+    1. Rephrase your prompt to avoid triggering content filters
+    2. Review [Azure OpenAI content filtering](https://learn.microsoft.com/azure/ai-services/openai/concepts/content-filter)
+    3. Apply for modified content filtering (enterprise customers)
+  </Accordion>
+  
+  <Accordion title="Context length exceeded">
+    **Error Message:**
+    ```
+    This model's maximum context length is X tokens.
+    ```
+    
+    **Solutions:**
+    
+    1. Reduce message history length
+    2. Use a model with larger context window
+    3. Enable Cline's auto-condense feature
+  </Accordion>
+</AccordionGroup>
+
+---
+
+### Network Errors
+
+<AccordionGroup>
+  <Accordion title="Unable to reach endpoint">
+    **Error Message:**
+    ```
+    Unable to reach Microsoft Foundry endpoint. Check your network connectivity and verify the endpoint URL is correct.
+    ```
+    
+    **Solutions:**
+    
+    1. **Check endpoint URL format:**
+       - Remove trailing slash
+       - Use correct domain (.azure.com vs .azure.us)
+    
+    2. **Test connectivity:**
+       ```bash
+       curl -I https://{endpoint}/openai/deployments?api-version=2024-08-01-preview
+       ```
+    
+    3. **Check firewall/proxy settings:**
+       - Ensure `*.cognitiveservices.azure.com` is allowed
+       - Check corporate proxy configuration
+    
+    4. **VPN issues:**
+       - Some VPNs block Azure endpoints
+       - Try disconnecting VPN temporarily
+  </Accordion>
+  
+  <Accordion title="SSL/TLS certificate errors">
+    **Cause:** Network inspection, corporate proxy, or certificate issues.
+    
+    **Solutions:**
+    
+    1. **Update certificates:**
+       ```bash
+       # macOS
+       brew install ca-certificates
+       
+       # Ubuntu
+       sudo update-ca-certificates
+       ```
+    
+    2. **Check proxy configuration** — Ensure proxy certificate is trusted
+    
+    3. **Corporate environments** — Contact IT about SSL inspection exceptions
+  </Accordion>
+  
+  <Accordion title="Timeout errors">
+    **Cause:** Slow network, overloaded endpoint, or large requests.
+    
+    **Solutions:**
+    
+    1. Check your network speed
+    2. Try a different deployment/model
+    3. Reduce request size (shorter prompts)
+    4. Check Azure status: https://status.azure.com
+  </Accordion>
+</AccordionGroup>
+
+---
+
+### Government Cloud Issues
+
+<AccordionGroup>
+  <Accordion title="Wrong cloud environment">
+    **Symptoms:** Authentication works but requests fail with 404 or unauthorized.
+    
+    **Solution:**
+    
+    1. Verify Azure CLI is set to correct cloud:
+       ```bash
+       az cloud show --query name
+       ```
+    
+    2. Set correct cloud:
+       ```bash
+       az cloud set --name AzureUSGovernment
+       az login
+       ```
+    
+    3. In Cline settings, select **Government** environment
+  </Accordion>
+  
+  <Accordion title="Audience scope mismatch">
+    **Error:** Token acquisition fails with audience/scope errors.
+    
+    **Solution:**
+    
+    Cline automatically uses the correct scope based on your endpoint URL:
+    - `.azure.com` → `https://cognitiveservices.azure.com/.default`
+    - `.azure.us` → `https://cognitiveservices.azure.us/.default`
+    
+    Ensure your endpoint URL matches your cloud environment.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+### Azure Stack Issues
+
+<AccordionGroup>
+  <Accordion title="Custom scope required">
+    **Error Message:**
+    ```
+    Azure Stack environment requires a custom audience scope.
+    ```
+    
+    **Solution:**
+    
+    1. Get the correct scope from your Azure Stack administrator
+    2. In Cline settings, select **Stack** environment
+    3. Enter the custom scope in the **Custom Scope** field
+    
+    Common Stack scope formats:
+    - `https://cognitiveservices.{stack-domain}/.default`
+    - Check your Stack's Azure AD configuration
+  </Accordion>
+  
+  <Accordion title="Certificate trust issues">
+    **Cause:** Azure Stack uses custom certificates.
+    
+    **Solution:**
+    
+    1. Install Azure Stack root certificate on your machine
+    2. Trust certificate in VS Code if prompted
+    3. Set environment variable if needed:
+       ```bash
+       export NODE_TLS_REJECT_UNAUTHORIZED=0  # Use cautiously
+       ```
+  </Accordion>
+</AccordionGroup>
+
+---
+
+### Getting Help
+
+If you're still experiencing issues:
+
+1. **Check Azure Status:** [status.azure.com](https://status.azure.com)
+2. **Enable Debug Logging:** View Cline's output channel in VS Code
+3. **Community Support:** [Cline Discord](https://discord.gg/cline)
+4. **GitHub Issues:** [github.com/cline/cline/issues](https://github.com/cline/cline/issues)
+
+When reporting issues, include:
+- Error message (exact text)
+- Cloud environment (Commercial/Government/Stack)
+- Authentication method (Azure Identity/API Key)
+- Azure region
+- Model/deployment name

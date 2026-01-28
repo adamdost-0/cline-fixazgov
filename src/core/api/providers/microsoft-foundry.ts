@@ -442,7 +442,7 @@ export class MicrosoftFoundryHandler implements ApiHandler {
 						fetch,
 					})
 				}
-			} catch (error: any) {
+			} catch (error: unknown) {
 				// Provide tailored error messages
 				const errorMessage = this.getDetailedErrorMessage(error)
 				throw new Error(errorMessage)
@@ -454,9 +454,10 @@ export class MicrosoftFoundryHandler implements ApiHandler {
 	/**
 	 * Translate errors into actionable, provider-specific messages.
 	 */
-	private getDetailedErrorMessage(error: any): string {
-		const message = error?.message ?? String(error)
-		const statusCode = error?.status || error?.statusCode
+	private getDetailedErrorMessage(error: unknown): string {
+		const message = error instanceof Error ? error.message : String(error)
+		const err = error as any // tailored access to properties
+		const statusCode = err?.status || err?.statusCode
 
 		// Authentication errors
 		if (statusCode === 401 || message.includes("401") || message.includes("Unauthorized")) {
