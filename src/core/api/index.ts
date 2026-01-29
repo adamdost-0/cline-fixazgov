@@ -458,6 +458,7 @@ function createHandlerForProvider(
 				microsoftFoundryApiVersion: options.microsoftFoundryApiVersion,
 				microsoftFoundryModelInfo:
 					mode === "plan" ? options.planModeMicrosoftFoundryModelInfo : options.actModeMicrosoftFoundryModelInfo,
+				reasoningEffort: mode === "plan" ? options.planModeReasoningEffort : options.actModeReasoningEffort,
 			})
 		default:
 			return new AnthropicHandler({

@@ -24,6 +24,7 @@ export interface MicrosoftFoundryHandlerOptions extends CommonApiHandlerOptions 
 	microsoftFoundryCustomScope?: string
 	microsoftFoundryApiVersion?: string
 	microsoftFoundryModelInfo?: ModelInfo
+	reasoningEffort?: string
 }
 
 /**
@@ -513,10 +514,12 @@ export class MicrosoftFoundryHandler implements ApiHandler {
 		}
 
 		const deploymentLower = deploymentId.toLowerCase()
+		const modelInfo = this.options.microsoftFoundryModelInfo ?? getModelCapabilities(deploymentId)
 
 		// Determine if this is a reasoning model (o1/o3/o4 family)
 		const isReasoningModel =
-			["o1", "o3", "o4"].some((prefix) => deploymentLower.includes(prefix)) && !deploymentLower.includes("chat")
+			modelInfo.supportsReasoning ||
+			(["o1", "o3", "o4"].some((prefix) => deploymentLower.includes(prefix)) && !deploymentLower.includes("chat"))
 
 		// Models that don't support custom temperature (only default value of 1)
 		// GPT-5.x models have this restriction
@@ -530,11 +533,10 @@ export class MicrosoftFoundryHandler implements ApiHandler {
 		let openAiMessages: OpenAI.Chat.ChatCompletionMessageParam[]
 		const temperature: number | undefined = noTemperatureSupport ? undefined : 0.7
 		let reasoningEffort: ChatCompletionReasoningEffort | undefined
-
 		if (isReasoningModel) {
 			// Reasoning models use 'developer' role for system prompt
 			openAiMessages = [{ role: "developer", content: systemPrompt }, ...convertToOpenAiMessages(messages)]
-			reasoningEffort = "medium"
+			reasoningEffort = (this.options.reasoningEffort as ChatCompletionReasoningEffort) || "medium"
 		} else {
 			openAiMessages = [{ role: "system", content: systemPrompt }, ...convertToOpenAiMessages(messages)]
 		}
@@ -544,7 +546,7 @@ export class MicrosoftFoundryHandler implements ApiHandler {
 				model: deploymentId, // In Azure OpenAI, model = deployment name
 				messages: openAiMessages,
 				temperature,
-				reasoning_effort: reasoningEffort,
+				...(reasoningEffort ? { reasoning_effort: reasoningEffort } : {}),
 				stream: true,
 				stream_options: { include_usage: true },
 				...getOpenAIToolParams(tools),

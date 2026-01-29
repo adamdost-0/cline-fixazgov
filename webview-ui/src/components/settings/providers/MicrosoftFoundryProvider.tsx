@@ -376,6 +376,12 @@ export const MicrosoftFoundryProvider = ({ showModelOptions, isPopup, currentMod
 		currentMode === "plan"
 			? apiConfiguration?.planModeMicrosoftFoundryModelInfo
 			: apiConfiguration?.actModeMicrosoftFoundryModelInfo
+	const effectiveModelInfo = deploymentId
+		? (currentModelInfo ?? getModelCapabilities(deploymentId))
+		: (currentModelInfo ?? DEFAULT_MODEL_INFO)
+	const supportsReasoningEffort =
+		!!deploymentId &&
+		(effectiveModelInfo.supportsReasoning || ["o1", "o3", "o4"].some((prefix) => deploymentId.toLowerCase().includes(prefix)))
 
 	return (
 		<div className="flex flex-col gap-3">
@@ -546,6 +552,35 @@ export const MicrosoftFoundryProvider = ({ showModelOptions, isPopup, currentMod
 							</DropdownContainer>
 						)}
 					</div>
+
+					{supportsReasoningEffort && (
+						<div>
+							<label className="font-medium" htmlFor="microsoft-foundry-reasoning-effort">
+								Reasoning Effort
+							</label>
+							<DropdownContainer className="dropdown-container" zIndex={DROPDOWN_Z_INDEX - 100}>
+								<VSCodeDropdown
+									className="w-full"
+									id="microsoft-foundry-reasoning-effort"
+									onChange={(e: any) =>
+										handleModeFieldChange(
+											{ plan: "planModeReasoningEffort", act: "actModeReasoningEffort" },
+											e.target.value,
+											currentMode,
+										)
+									}
+									value={modeFields.reasoningEffort || "medium"}>
+									<VSCodeOption value="minimal">Minimal</VSCodeOption>
+									<VSCodeOption value="low">Low</VSCodeOption>
+									<VSCodeOption value="medium">Medium</VSCodeOption>
+									<VSCodeOption value="high">High</VSCodeOption>
+								</VSCodeDropdown>
+							</DropdownContainer>
+							<p className="mt-1 text-xs text-description">
+								Higher effort may improve reasoning quality but increases latency and token usage.
+							</p>
+						</div>
+					)}
 
 					{/* Advanced Settings */}
 					<div
