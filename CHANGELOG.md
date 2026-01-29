@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.54.0]
+## [3.6.0-foundry]
 
 ### Added
 
-- Native tool calls support for Ollama provider
+- Microsoft Foundry support as a new provider
 - Sonnet 4.5 is now the default Amazon Bedrock model id
 
 ### Fixed
