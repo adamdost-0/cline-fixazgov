@@ -172,6 +172,17 @@ export function validateApiConfiguration(currentMode: Mode, apiConfiguration?: A
 					return "You must provide a valid API key"
 				}
 				break
+			case "microsoft-foundry":
+				if (!apiConfiguration.microsoftFoundryEndpoint) {
+					return "You must provide an Azure AI Foundry endpoint URL."
+				}
+				if (
+					apiConfiguration.microsoftFoundryAuthMode === "api-key" &&
+					!apiConfiguration.microsoftFoundryApiKey
+				) {
+					return "You must provide an API key when using API Key authentication, or switch to Entra ID (SSO)."
+				}
+				break
 		}
 	}
 	return undefined

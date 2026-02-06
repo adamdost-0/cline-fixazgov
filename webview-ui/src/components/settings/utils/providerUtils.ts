@@ -38,6 +38,7 @@ import {
 	mainlandQwenModels,
 	mainlandZAiDefaultModelId,
 	mainlandZAiModels,
+	microsoftFoundryModelInfoSaneDefaults,
 	minimaxDefaultModelId,
 	minimaxModels,
 	mistralDefaultModelId,
@@ -151,6 +152,7 @@ export function getModelsForProvider(
 		case "oca":
 		case "aihubmix":
 		case "together":
+		case "microsoft-foundry":
 		default:
 			return undefined
 	}
@@ -487,6 +489,16 @@ export function normalizeApiConfiguration(
 						? nousResearchModels[nousResearchModelId as keyof typeof nousResearchModels]
 						: nousResearchModels[nousResearchDefaultModelId],
 			}
+		case "microsoft-foundry":
+			const msFoundryDeploymentName =
+				currentMode === "plan"
+					? apiConfiguration?.planModeMicrosoftFoundryDeploymentName
+					: apiConfiguration?.actModeMicrosoftFoundryDeploymentName
+			return {
+				selectedProvider: provider,
+				selectedModelId: msFoundryDeploymentName || "",
+				selectedModelInfo: microsoftFoundryModelInfoSaneDefaults,
+			}
 		default:
 			return getProviderData(anthropicModels, anthropicDefaultModelId)
 	}
@@ -522,6 +534,7 @@ export function getModeSpecificFields(apiConfiguration: ApiConfiguration | undef
 			aihubmixModelId: undefined,
 			nousResearchModelId: undefined,
 			vercelAiGatewayModelId: undefined,
+			microsoftFoundryDeploymentName: undefined,
 
 			// Model info objects
 			openAiModelInfo: undefined,
@@ -575,6 +588,10 @@ export function getModeSpecificFields(apiConfiguration: ApiConfiguration | undef
 			mode === "plan" ? apiConfiguration.planModeNousResearchModelId : apiConfiguration.actModeNousResearchModelId,
 		vercelAiGatewayModelId:
 			mode === "plan" ? apiConfiguration.planModeVercelAiGatewayModelId : apiConfiguration.actModeVercelAiGatewayModelId,
+		microsoftFoundryDeploymentName:
+			mode === "plan"
+				? apiConfiguration.planModeMicrosoftFoundryDeploymentName
+				: apiConfiguration.actModeMicrosoftFoundryDeploymentName,
 
 		// Model info objects
 		openAiModelInfo: mode === "plan" ? apiConfiguration.planModeOpenAiModelInfo : apiConfiguration.actModeOpenAiModelInfo,

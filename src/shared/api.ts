@@ -43,6 +43,7 @@ export type ApiProvider =
 	| "minimax"
 	| "hicap"
 	| "nousResearch"
+	| "microsoft-foundry"
 
 export const DEFAULT_API_PROVIDER = "openrouter" as ApiProvider
 
@@ -1799,6 +1800,83 @@ export const openAiCodexModels = {
 // https://learn.microsoft.com/en-us/azure/ai-services/openai/api-version-deprecation
 // https://learn.microsoft.com/en-us/azure/ai-services/openai/reference#api-specs
 export const azureOpenAiDefaultApiVersion = "2024-08-01-preview"
+
+// Microsoft Foundry (Azure AI Foundry)
+// https://learn.microsoft.com/en-us/azure/ai-foundry/foundry-models/concepts/endpoints
+// https://learn.microsoft.com/en-us/azure/ai-foundry/foundry-models/how-to/configure-entra-id
+export const microsoftFoundryDefaultApiVersion = "2024-10-21"
+
+/**
+ * Authentication mode for Microsoft Foundry provider.
+ * - "entra-id": First-party SSO via DefaultAzureCredential (Entra ID / Azure CLI / Managed Identity)
+ * - "api-key": Bring-your-own-key with endpoint + API key + deployment name
+ */
+export type MicrosoftFoundryAuthMode = "entra-id" | "api-key"
+
+/**
+ * Detected Azure cloud environment based on endpoint URL regex matching.
+ * Used to determine correct Entra ID token audience scope.
+ */
+export type AzureCloudEnvironment = "commercial" | "government"
+
+/**
+ * Regex patterns for Azure endpoint classification.
+ * Commercial: *.openai.azure.com, *.services.ai.azure.com, *.cognitiveservices.azure.com
+ * Government: *.openai.azure.us, *.services.ai.azure.us, *.cognitiveservices.azure.us
+ *             plus *.usgovcloudapi.net patterns
+ */
+export const AZURE_ENDPOINT_PATTERNS = {
+	commercial: /\.(openai\.azure\.com|services\.ai\.azure\.com|cognitiveservices\.azure\.com)(\/|$)/i,
+	government: /\.(openai\.azure\.us|services\.ai\.azure\.us|cognitiveservices\.azure\.us|usgovcloudapi\.net)(\/|$)/i,
+} as const
+
+/**
+ * Cognitive Services audience scopes per Azure cloud environment.
+ * See: https://learn.microsoft.com/en-us/azure/ai-foundry/foundry-models/how-to/configure-entra-id
+ */
+export const AZURE_COGNITIVE_SCOPES: Record<AzureCloudEnvironment, string> = {
+	commercial: "https://cognitiveservices.azure.com/.default",
+	government: "https://cognitiveservices.azure.us/.default",
+} as const
+
+/**
+ * Classifies an Azure endpoint URL as Commercial or Government.
+ * Returns undefined if the URL doesn't match any known pattern.
+ */
+export function classifyAzureEndpoint(url: string | undefined): AzureCloudEnvironment | undefined {
+	if (!url) return undefined
+	const normalized = url.trim().toLowerCase()
+	if (AZURE_ENDPOINT_PATTERNS.government.test(normalized)) return "government"
+	if (AZURE_ENDPOINT_PATTERNS.commercial.test(normalized)) return "commercial"
+	return undefined
+}
+
+/**
+ * Returns the correct Cognitive Services token scope for the detected cloud.
+ * Defaults to commercial scope if cloud cannot be determined.
+ */
+export function getAzureCognitiveScope(url: string | undefined): string {
+	const cloud = classifyAzureEndpoint(url)
+	return AZURE_COGNITIVE_SCOPES[cloud ?? "commercial"]
+}
+
+/**
+ * Validates a Microsoft Foundry endpoint URL.
+ * Must match a known Azure endpoint pattern (Commercial or Government).
+ */
+export function isValidFoundryEndpoint(url: string | undefined): boolean {
+	return classifyAzureEndpoint(url) !== undefined
+}
+
+export const microsoftFoundryModelInfoSaneDefaults: ModelInfo = {
+	maxTokens: 16384,
+	contextWindow: 128000,
+	supportsImages: true,
+	supportsPromptCache: false,
+	inputPrice: 0,
+	outputPrice: 0,
+	description: "Microsoft Foundry model deployment",
+}
 
 // DeepSeek
 // https://api-docs.deepseek.com/quick_start/pricing

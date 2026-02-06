@@ -13,6 +13,7 @@ import {
 	LiteLLMModelInfo as AppLiteLLMModelInfo,
 	OpenAiCompatibleModelInfo as AppOpenAiCompatibleModelInfo,
 	BedrockModelId,
+	MicrosoftFoundryAuthMode,
 	ModelInfo,
 	OcaModelInfo,
 } from "../../api"
@@ -325,6 +326,8 @@ function convertApiProviderToProto(provider: string | undefined): ProtoApiProvid
 			return ProtoApiProvider.NOUSRESEARCH
 		case "openai-codex":
 			return ProtoApiProvider.OPENAI_CODEX
+		case "microsoft-foundry":
+			return ProtoApiProvider.MICROSOFT_FOUNDRY
 		default:
 			return ProtoApiProvider.ANTHROPIC
 	}
@@ -415,6 +418,8 @@ export function convertProtoToApiProvider(provider: ProtoApiProvider): ApiProvid
 			return "nousResearch"
 		case ProtoApiProvider.OPENAI_CODEX:
 			return "openai-codex"
+		case ProtoApiProvider.MICROSOFT_FOUNDRY:
+			return "microsoft-foundry"
 		default:
 			return "anthropic"
 	}
@@ -508,6 +513,10 @@ export function convertApiConfigurationToProto(config: ApiConfiguration): ProtoA
 		aihubmixAppCode: config.aihubmixAppCode,
 		hicapApiKey: config.hicapApiKey,
 		hicapModelId: config.hicapModelId,
+		microsoftFoundryEndpoint: config.microsoftFoundryEndpoint,
+		microsoftFoundryAuthMode: config.microsoftFoundryAuthMode,
+		microsoftFoundryApiVersion: config.microsoftFoundryApiVersion,
+		microsoftFoundryApiKey: config.microsoftFoundryApiKey,
 
 		// Plan mode configurations
 		planModeApiProvider: config.planModeApiProvider ? convertApiProviderToProto(config.planModeApiProvider) : undefined,
@@ -550,6 +559,7 @@ export function convertApiConfigurationToProto(config: ApiConfiguration): ProtoA
 		planModeNousResearchModelId: config.planModeNousResearchModelId,
 		planModeVercelAiGatewayModelId: config.planModeVercelAiGatewayModelId,
 		planModeVercelAiGatewayModelInfo: convertModelInfoToProtoOpenRouter(config.planModeVercelAiGatewayModelInfo),
+		planModeMicrosoftFoundryDeploymentName: config.planModeMicrosoftFoundryDeploymentName,
 
 		// Act mode configurations
 		actModeApiProvider: config.actModeApiProvider ? convertApiProviderToProto(config.actModeApiProvider) : undefined,
@@ -592,6 +602,7 @@ export function convertApiConfigurationToProto(config: ApiConfiguration): ProtoA
 		actModeNousResearchModelId: config.actModeNousResearchModelId,
 		actModeVercelAiGatewayModelId: config.actModeVercelAiGatewayModelId,
 		actModeVercelAiGatewayModelInfo: convertModelInfoToProtoOpenRouter(config.actModeVercelAiGatewayModelInfo),
+		actModeMicrosoftFoundryDeploymentName: config.actModeMicrosoftFoundryDeploymentName,
 	}
 }
 
@@ -683,6 +694,10 @@ export function convertProtoToApiConfiguration(protoConfig: ProtoApiConfiguratio
 		hicapModelId: protoConfig.hicapModelId,
 		nousResearchApiKey: protoConfig.nousResearchApiKey,
 		clineApiKey: protoConfig.clineApiKey,
+		microsoftFoundryEndpoint: protoConfig.microsoftFoundryEndpoint,
+		microsoftFoundryAuthMode: protoConfig.microsoftFoundryAuthMode as MicrosoftFoundryAuthMode | undefined,
+		microsoftFoundryApiVersion: protoConfig.microsoftFoundryApiVersion,
+		microsoftFoundryApiKey: protoConfig.microsoftFoundryApiKey,
 
 		// Plan mode configurations
 		planModeApiProvider:
@@ -728,6 +743,7 @@ export function convertProtoToApiConfiguration(protoConfig: ProtoApiConfiguratio
 		planModeNousResearchModelId: protoConfig.planModeNousResearchModelId,
 		planModeVercelAiGatewayModelId: protoConfig.planModeVercelAiGatewayModelId,
 		planModeVercelAiGatewayModelInfo: convertProtoToModelInfo(protoConfig.planModeVercelAiGatewayModelInfo),
+		planModeMicrosoftFoundryDeploymentName: protoConfig.planModeMicrosoftFoundryDeploymentName,
 
 		// Act mode configurations
 		actModeApiProvider:
@@ -771,5 +787,6 @@ export function convertProtoToApiConfiguration(protoConfig: ProtoApiConfiguratio
 		actModeNousResearchModelId: protoConfig.actModeNousResearchModelId,
 		actModeVercelAiGatewayModelId: protoConfig.actModeVercelAiGatewayModelId,
 		actModeVercelAiGatewayModelInfo: convertProtoToModelInfo(protoConfig.actModeVercelAiGatewayModelInfo),
+		actModeMicrosoftFoundryDeploymentName: protoConfig.actModeMicrosoftFoundryDeploymentName,
 	}
 }

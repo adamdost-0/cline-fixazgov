@@ -32,6 +32,7 @@ import { HuggingFaceProvider } from "./providers/HuggingFaceProvider"
 import { LiteLlmProvider } from "./providers/LiteLlmProvider"
 import { LMStudioProvider } from "./providers/LMStudioProvider"
 import { MinimaxProvider } from "./providers/MiniMaxProvider"
+import { MicrosoftFoundryProvider } from "./providers/MicrosoftFoundryProvider"
 import { MistralProvider } from "./providers/MistralProvider"
 import { MoonshotProvider } from "./providers/MoonshotProvider"
 import { NebiusProvider } from "./providers/NebiusProvider"
@@ -513,6 +514,10 @@ const ApiOptions = ({
 
 			{apiConfiguration && selectedProvider === "aihubmix" && (
 				<AIhubmixProvider currentMode={currentMode} isPopup={isPopup} showModelOptions={showModelOptions} />
+			)}
+
+			{apiConfiguration && selectedProvider === "microsoft-foundry" && (
+				<MicrosoftFoundryProvider currentMode={currentMode} isPopup={isPopup} showModelOptions={showModelOptions} />
 			)}
 
 			{apiErrorMessage && (
