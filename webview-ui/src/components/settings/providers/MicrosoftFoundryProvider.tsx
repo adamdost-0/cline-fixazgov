@@ -2,8 +2,8 @@
  * Microsoft Foundry Provider Configuration UI
  *
  * Supports two authentication modes with conditional field visibility:
- * - Entra ID (SSO): Endpoint + Deployment Name (API key hidden)
- * - API Key (BYOK): Endpoint + API Key + Deployment Name (SSO info hidden)
+ * - Entra ID (SSO): Endpoint only (API key hidden)
+ * - API Key (BYOK): Endpoint + API Key (SSO info hidden)
  *
  * Endpoint is validated via regex to classify Azure Commercial vs Government.
  * Cloud environment badge is shown when endpoint is valid.
@@ -41,14 +41,10 @@ export const MicrosoftFoundryProvider = ({
 	currentMode,
 }: MicrosoftFoundryProviderProps) => {
 	const { apiConfiguration } = useExtensionState()
-	const { handleFieldChange, handleModeFieldChange } = useApiConfigurationHandlers()
+	const { handleFieldChange } = useApiConfigurationHandlers()
 
 	const authMode: MicrosoftFoundryAuthMode = apiConfiguration?.microsoftFoundryAuthMode ?? "entra-id"
 	const endpoint = apiConfiguration?.microsoftFoundryEndpoint ?? ""
-	const deploymentName =
-		currentMode === "plan"
-			? apiConfiguration?.planModeMicrosoftFoundryDeploymentName
-			: apiConfiguration?.actModeMicrosoftFoundryDeploymentName
 
 	// Classify cloud environment from endpoint URL
 	const cloudEnvironment = useMemo(() => classifyAzureEndpoint(endpoint), [endpoint])
@@ -152,24 +148,6 @@ export const MicrosoftFoundryProvider = ({
 				</DebouncedTextField>
 			)}
 
-			{/* Deployment Name (model name in Azure) */}
-			<DebouncedTextField
-				className="w-full"
-				initialValue={deploymentName ?? ""}
-				onChange={(value) =>
-					handleModeFieldChange(
-						{
-							plan: "planModeMicrosoftFoundryDeploymentName",
-							act: "actModeMicrosoftFoundryDeploymentName",
-						},
-						value,
-						currentMode,
-					)
-				}
-				placeholder="e.g. gpt-4o, DeepSeek-V3.1">
-				<span className="font-medium">Deployment Name</span>
-			</DebouncedTextField>
-
 			{/* API Version override */}
 			<DebouncedTextField
 				className="w-full"
@@ -184,7 +162,7 @@ export const MicrosoftFoundryProvider = ({
 				<ModelInfoView
 					isPopup={isPopup}
 					modelInfo={selectedModelInfo || microsoftFoundryModelInfoSaneDefaults}
-					selectedModelId={deploymentName || ""}
+					selectedModelId=""
 				/>
 			)}
 		</div>

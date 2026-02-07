@@ -47,10 +47,7 @@ export async function updateSettings(controller: Controller, request: UpdateSett
 					? convertProtoToApiProvider(protoApiConfiguration.actModeApiProvider)
 					: undefined,
 				// Cast proto string to typed auth mode union
-				microsoftFoundryAuthMode: protoApiConfiguration.microsoftFoundryAuthMode as
-					| "entra-id"
-					| "api-key"
-					| undefined,
+				microsoftFoundryAuthMode: protoApiConfiguration.microsoftFoundryAuthMode as "entra-id" | "api-key" | undefined,
 			}
 
 			controller.stateManager.setApiConfiguration(convertedApiConfigurationFromProto)

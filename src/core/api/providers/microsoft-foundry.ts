@@ -21,7 +21,6 @@ import {
 	type MicrosoftFoundryAuthMode,
 	microsoftFoundryDefaultApiVersion,
 	microsoftFoundryModelInfoSaneDefaults,
-	type ModelInfo,
 } from "@shared/api"
 import { AzureOpenAI } from "openai"
 import type OpenAI from "openai"
@@ -41,7 +40,7 @@ export interface MicrosoftFoundryHandlerOptions extends CommonApiHandlerOptions 
 	microsoftFoundryEndpoint?: string
 	/** API key for BYOK authentication mode */
 	microsoftFoundryApiKey?: string
-	/** Model deployment name in the Foundry resource */
+	/** Model deployment name in the Foundry resource (required for API calls) */
 	microsoftFoundryDeploymentName?: string
 	/** Authentication mode: "entra-id" (SSO) or "api-key" (BYOK) */
 	microsoftFoundryAuthMode?: MicrosoftFoundryAuthMode
@@ -112,6 +111,9 @@ export class MicrosoftFoundryHandler implements ApiHandler {
 					// SSO via DefaultAzureCredential — supports Azure CLI, Managed Identity,
 					// Visual Studio, environment variables, etc.
 					const scope = getAzureCognitiveScope(endpoint)
+					if (!scope) {
+						throw new Error("Unable to determine token scope for endpoint: " + endpoint)
+					}
 					this.client = new AzureOpenAI({
 						endpoint,
 						azureADTokenProvider: getBearerTokenProvider(new DefaultAzureCredential(), scope),
@@ -149,7 +151,7 @@ export class MicrosoftFoundryHandler implements ApiHandler {
 		tools?: ChatCompletionTool[],
 	): ApiStream {
 		const client = this.ensureClient()
-		const deploymentName = this.options.microsoftFoundryDeploymentName || this.options.apiModelId || ""
+		const deploymentName = this.options.microsoftFoundryDeploymentName || ""
 
 		if (!deploymentName) {
 			throw new Error(
@@ -216,7 +218,7 @@ export class MicrosoftFoundryHandler implements ApiHandler {
 	}
 
 	getModel() {
-		const deploymentName = this.options.microsoftFoundryDeploymentName || this.options.apiModelId || ""
+		const deploymentName = this.options.microsoftFoundryDeploymentName || ""
 		return {
 			id: deploymentName,
 			info: microsoftFoundryModelInfoSaneDefaults,

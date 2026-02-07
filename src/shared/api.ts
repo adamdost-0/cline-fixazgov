@@ -1853,11 +1853,12 @@ export function classifyAzureEndpoint(url: string | undefined): AzureCloudEnviro
 
 /**
  * Returns the correct Cognitive Services token scope for the detected cloud.
- * Defaults to commercial scope if cloud cannot be determined.
+ * Returns undefined if the endpoint is not recognized as a known Azure cloud.
  */
-export function getAzureCognitiveScope(url: string | undefined): string {
+export function getAzureCognitiveScope(url: string | undefined): string | undefined {
 	const cloud = classifyAzureEndpoint(url)
-	return AZURE_COGNITIVE_SCOPES[cloud ?? "commercial"]
+	if (cloud === undefined) return undefined
+	return AZURE_COGNITIVE_SCOPES[cloud]
 }
 
 /**
