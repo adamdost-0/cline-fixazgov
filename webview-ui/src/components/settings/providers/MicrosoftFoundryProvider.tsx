@@ -41,7 +41,7 @@ export const MicrosoftFoundryProvider = ({
 	currentMode,
 }: MicrosoftFoundryProviderProps) => {
 	const { apiConfiguration } = useExtensionState()
-	const { handleFieldChange } = useApiConfigurationHandlers()
+	const { handleFieldChange, handleModeFieldChange } = useApiConfigurationHandlers()
 
 	const authMode: MicrosoftFoundryAuthMode = apiConfiguration?.microsoftFoundryAuthMode ?? "entra-id"
 	const endpoint = apiConfiguration?.microsoftFoundryEndpoint ?? ""
@@ -49,7 +49,7 @@ export const MicrosoftFoundryProvider = ({
 	// Classify cloud environment from endpoint URL
 	const cloudEnvironment = useMemo(() => classifyAzureEndpoint(endpoint), [endpoint])
 
-	const { selectedModelInfo } = normalizeApiConfiguration(apiConfiguration, currentMode)
+	const { selectedModelInfo, selectedModelId } = normalizeApiConfiguration(apiConfiguration, currentMode)
 
 	return (
 		<div className="flex flex-col gap-1">
@@ -121,6 +121,21 @@ export const MicrosoftFoundryProvider = ({
 						</span>
 					)}
 				</div>
+			</DebouncedTextField>
+
+			{/* Deployment Name — mode-aware (plan/act) */}
+			<DebouncedTextField
+				className="w-full"
+				initialValue={selectedModelId}
+				onChange={(value) =>
+					handleModeFieldChange(
+						{ plan: "planModeMicrosoftFoundryDeploymentName", act: "actModeMicrosoftFoundryDeploymentName" },
+						value,
+						currentMode,
+					)
+				}
+				placeholder="e.g. gpt-4o, o4-mini">
+				<span className="font-medium">Deployment Name</span>
 			</DebouncedTextField>
 
 			{/* Endpoint validation hint */}

@@ -236,6 +236,7 @@ message ModelsApiOptions {
   optional string microsoft_foundry_endpoint = 45;
   optional string microsoft_foundry_auth_mode = 46;
   optional string microsoft_foundry_api_version = 47;
+  optional bool microsoft_foundry_allow_custom_endpoint = 48;
 
   // Plan mode configurations
   optional ApiProvider plan_mode_api_provider = 100;
@@ -586,6 +587,7 @@ message ModelsApiConfiguration {
   optional string microsoft_foundry_auth_mode = 88;
   optional string microsoft_foundry_api_version = 89;
   optional string microsoft_foundry_api_key = 90;
+  optional bool microsoft_foundry_allow_custom_endpoint = 91;
 
   // Plan mode configurations
   optional ApiProvider plan_mode_api_provider = 100;
@@ -629,6 +631,8 @@ message ModelsApiConfiguration {
   optional string plan_mode_nous_research_model_id = 138;
   optional string gemini_plan_mode_thinking_level = 139;
   optional string plan_mode_microsoft_foundry_deployment_name = 140;
+  optional bool plan_mode_microsoft_foundry_use_reasoning = 141;
+  optional OpenRouterModelInfo plan_mode_microsoft_foundry_model_info = 142;
 
   // Act mode configurations
   optional ApiProvider act_mode_api_provider = 200;
@@ -672,4 +676,6 @@ message ModelsApiConfiguration {
   optional string act_mode_nous_research_model_id = 238;
   optional string gemini_act_mode_thinking_level = 239;
   optional string act_mode_microsoft_foundry_deployment_name = 240;
+  optional bool act_mode_microsoft_foundry_use_reasoning = 241;
+  optional OpenRouterModelInfo act_mode_microsoft_foundry_model_info = 242;
 }
