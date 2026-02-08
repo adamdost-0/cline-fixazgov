@@ -20,13 +20,16 @@ import {
 	type MicrosoftFoundryAuthMode,
 } from "@shared/api"
 import { Mode } from "@shared/storage/types"
-import { VSCodeRadio, VSCodeRadioGroup } from "@vscode/webview-ui-toolkit/react"
-import { useMemo } from "react"
+import { VSCodeCheckbox, VSCodeDropdown, VSCodeOption, VSCodeRadio, VSCodeRadioGroup } from "@vscode/webview-ui-toolkit/react"
+import { useMemo, useState } from "react"
 import { useExtensionState } from "@/context/ExtensionStateContext"
 import { getAsVar, VSC_DESCRIPTION_FOREGROUND } from "@/utils/vscStyles"
+import { DROPDOWN_Z_INDEX } from "../ApiOptions"
 import { DebouncedTextField } from "../common/DebouncedTextField"
 import { ModelInfoView } from "../common/ModelInfoView"
-import { normalizeApiConfiguration } from "../utils/providerUtils"
+import { DropdownContainer } from "../common/ModelSelector"
+import { RemotelyConfiguredInputWrapper } from "../common/RemotelyConfiguredInputWrapper"
+import { getModeSpecificFields, normalizeApiConfiguration } from "../utils/providerUtils"
 import { useApiConfigurationHandlers } from "../utils/useApiConfigurationHandlers"
 
 interface MicrosoftFoundryProviderProps {
@@ -40,7 +43,7 @@ export const MicrosoftFoundryProvider = ({
 	isPopup,
 	currentMode,
 }: MicrosoftFoundryProviderProps) => {
-	const { apiConfiguration } = useExtensionState()
+	const { apiConfiguration, remoteConfigSettings } = useExtensionState()
 	const { handleFieldChange, handleModeFieldChange } = useApiConfigurationHandlers()
 
 	const authMode: MicrosoftFoundryAuthMode = apiConfiguration?.microsoftFoundryAuthMode ?? "entra-id"
@@ -50,6 +53,15 @@ export const MicrosoftFoundryProvider = ({
 	const cloudEnvironment = useMemo(() => classifyAzureEndpoint(endpoint), [endpoint])
 
 	const { selectedModelInfo, selectedModelId } = normalizeApiConfiguration(apiConfiguration, currentMode)
+	const modeFields = getModeSpecificFields(apiConfiguration, currentMode)
+
+	// Detect reasoning models from deployment name
+	const isReasoningModel = useMemo(
+		() => ["o1", "o3", "o4"].some((prefix) => (selectedModelId || "").toLowerCase().includes(prefix)),
+		[selectedModelId],
+	)
+
+	const [reasoningEffortSelected, setReasoningEffortSelected] = useState(!!modeFields.reasoningEffort)
 
 	return (
 		<div className="flex flex-col gap-1">
@@ -96,32 +108,35 @@ export const MicrosoftFoundryProvider = ({
 				)}
 			</p>
 
-			{/* Endpoint URL */}
-			<DebouncedTextField
-				className="w-full"
-				initialValue={endpoint}
-				onChange={(value) => handleFieldChange("microsoftFoundryEndpoint", value)}
-				placeholder="https://<resource>.openai.azure.com">
-				<div className="flex items-center gap-2">
-					<span className="font-medium">Endpoint URL</span>
-					{cloudEnvironment && (
-						<span
-							style={{
-								fontSize: "11px",
-								padding: "1px 6px",
-								borderRadius: "3px",
-								backgroundColor:
-									cloudEnvironment === "government"
-										? "var(--vscode-charts-purple)"
-										: "var(--vscode-charts-blue)",
-								color: "white",
-								fontWeight: 600,
-							}}>
-							{cloudEnvironment === "government" ? "Azure Government" : "Azure Commercial"}
-						</span>
-					)}
-				</div>
-			</DebouncedTextField>
+			{/* Endpoint URL — wrapped for remote config lock */}
+			<RemotelyConfiguredInputWrapper hidden={remoteConfigSettings?.microsoftFoundryEndpoint === undefined}>
+				<DebouncedTextField
+					className="w-full"
+					disabled={!!remoteConfigSettings?.microsoftFoundryEndpoint}
+					initialValue={endpoint}
+					onChange={(value) => handleFieldChange("microsoftFoundryEndpoint", value)}
+					placeholder="https://<resource>.openai.azure.com">
+					<div className="flex items-center gap-2">
+						<span className="font-medium">Endpoint URL</span>
+						{cloudEnvironment && (
+							<span
+								style={{
+									fontSize: "11px",
+									padding: "1px 6px",
+									borderRadius: "3px",
+									backgroundColor:
+										cloudEnvironment === "government"
+											? "var(--vscode-charts-purple)"
+											: "var(--vscode-charts-blue)",
+									color: "white",
+									fontWeight: 600,
+								}}>
+								{cloudEnvironment === "government" ? "Azure Government" : "Azure Commercial"}
+							</span>
+						)}
+					</div>
+				</DebouncedTextField>
+			</RemotelyConfiguredInputWrapper>
 
 			{/* Deployment Name — mode-aware (plan/act) */}
 			<DebouncedTextField
@@ -134,9 +149,18 @@ export const MicrosoftFoundryProvider = ({
 						currentMode,
 					)
 				}
-				placeholder="e.g. gpt-4o, o4-mini">
+				placeholder="e.g. my-gpt4o-deployment">
 				<span className="font-medium">Deployment Name</span>
 			</DebouncedTextField>
+			<p
+				style={{
+					fontSize: "12px",
+					color: getAsVar(VSC_DESCRIPTION_FOREGROUND),
+					margin: "2px 0 4px 0",
+				}}>
+				Enter your Azure deployment name (found in Azure AI Foundry portal under Deployments). This may differ
+				from the model name.
+			</p>
 
 			{/* Endpoint validation hint */}
 			{endpoint && !cloudEnvironment && (
@@ -163,21 +187,81 @@ export const MicrosoftFoundryProvider = ({
 				</DebouncedTextField>
 			)}
 
-			{/* API Version override */}
-			<DebouncedTextField
-				className="w-full"
-				initialValue={apiConfiguration?.microsoftFoundryApiVersion ?? ""}
-				onChange={(value) => handleFieldChange("microsoftFoundryApiVersion", value)}
-				placeholder={`Default: ${microsoftFoundryDefaultApiVersion}`}>
-				<span className="font-medium">API Version (optional)</span>
-			</DebouncedTextField>
+			{/* API Version override — wrapped for remote config lock */}
+			<RemotelyConfiguredInputWrapper hidden={remoteConfigSettings?.microsoftFoundryApiVersion === undefined}>
+				<DebouncedTextField
+					className="w-full"
+					disabled={!!remoteConfigSettings?.microsoftFoundryApiVersion}
+					initialValue={apiConfiguration?.microsoftFoundryApiVersion ?? ""}
+					onChange={(value) => handleFieldChange("microsoftFoundryApiVersion", value)}
+					placeholder={`Default: ${microsoftFoundryDefaultApiVersion}`}>
+					<span className="font-medium">API Version (optional)</span>
+				</DebouncedTextField>
+			</RemotelyConfiguredInputWrapper>
+
+			{/* Reasoning effort — shown for reasoning model deployments */}
+			{showModelOptions && isReasoningModel && (
+				<>
+					<VSCodeCheckbox
+						checked={reasoningEffortSelected}
+						onChange={(e: any) => {
+							const isChecked = e.target.checked === true
+							setReasoningEffortSelected(isChecked)
+							if (!isChecked) {
+								handleModeFieldChange(
+									{ plan: "planModeReasoningEffort", act: "actModeReasoningEffort" },
+									"",
+									currentMode,
+								)
+							}
+						}}
+						style={{ marginTop: 0 }}>
+						Modify reasoning effort
+					</VSCodeCheckbox>
+
+					{reasoningEffortSelected && (
+						<div>
+							<label htmlFor="foundry-reasoning-effort-dropdown">
+								<span>Reasoning Effort</span>
+							</label>
+							<DropdownContainer className="dropdown-container" zIndex={DROPDOWN_Z_INDEX - 100}>
+								<VSCodeDropdown
+									id="foundry-reasoning-effort-dropdown"
+									onChange={(e: any) => {
+										handleModeFieldChange(
+											{ plan: "planModeReasoningEffort", act: "actModeReasoningEffort" },
+											e.target.value,
+											currentMode,
+										)
+									}}
+									style={{ width: "100%", marginTop: 3 }}
+									value={modeFields.reasoningEffort || "medium"}>
+									<VSCodeOption value="low">low</VSCodeOption>
+									<VSCodeOption value="medium">medium</VSCodeOption>
+									<VSCodeOption value="high">high</VSCodeOption>
+								</VSCodeDropdown>
+							</DropdownContainer>
+							<p
+								style={{
+									fontSize: "12px",
+									marginTop: 3,
+									marginBottom: 0,
+									color: "var(--vscode-descriptionForeground)",
+								}}>
+								Controls how much effort the model spends on reasoning. Higher effort uses more tokens but
+								may produce more thorough analysis.
+							</p>
+						</div>
+					)}
+				</>
+			)}
 
 			{/* Model info */}
 			{showModelOptions && (
 				<ModelInfoView
 					isPopup={isPopup}
 					modelInfo={selectedModelInfo || microsoftFoundryModelInfoSaneDefaults}
-					selectedModelId=""
+					selectedModelId={selectedModelId}
 				/>
 			)}
 		</div>

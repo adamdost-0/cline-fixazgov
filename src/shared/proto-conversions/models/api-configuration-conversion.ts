@@ -560,6 +560,8 @@ export function convertApiConfigurationToProto(config: ApiConfiguration): ProtoA
 		planModeVercelAiGatewayModelId: config.planModeVercelAiGatewayModelId,
 		planModeVercelAiGatewayModelInfo: convertModelInfoToProtoOpenRouter(config.planModeVercelAiGatewayModelInfo),
 		planModeMicrosoftFoundryDeploymentName: config.planModeMicrosoftFoundryDeploymentName,
+		planModeMicrosoftFoundryUseReasoning: config.planModeMicrosoftFoundryUseReasoning,
+		planModeMicrosoftFoundryModelInfo: convertModelInfoToProtoOpenRouter(config.planModeMicrosoftFoundryModelInfo),
 
 		// Act mode configurations
 		actModeApiProvider: config.actModeApiProvider ? convertApiProviderToProto(config.actModeApiProvider) : undefined,
@@ -603,6 +605,8 @@ export function convertApiConfigurationToProto(config: ApiConfiguration): ProtoA
 		actModeVercelAiGatewayModelId: config.actModeVercelAiGatewayModelId,
 		actModeVercelAiGatewayModelInfo: convertModelInfoToProtoOpenRouter(config.actModeVercelAiGatewayModelInfo),
 		actModeMicrosoftFoundryDeploymentName: config.actModeMicrosoftFoundryDeploymentName,
+		actModeMicrosoftFoundryUseReasoning: config.actModeMicrosoftFoundryUseReasoning,
+		actModeMicrosoftFoundryModelInfo: convertModelInfoToProtoOpenRouter(config.actModeMicrosoftFoundryModelInfo),
 	}
 }
 
@@ -744,6 +748,8 @@ export function convertProtoToApiConfiguration(protoConfig: ProtoApiConfiguratio
 		planModeVercelAiGatewayModelId: protoConfig.planModeVercelAiGatewayModelId,
 		planModeVercelAiGatewayModelInfo: convertProtoToModelInfo(protoConfig.planModeVercelAiGatewayModelInfo),
 		planModeMicrosoftFoundryDeploymentName: protoConfig.planModeMicrosoftFoundryDeploymentName,
+		planModeMicrosoftFoundryUseReasoning: protoConfig.planModeMicrosoftFoundryUseReasoning,
+		planModeMicrosoftFoundryModelInfo: convertProtoToModelInfo(protoConfig.planModeMicrosoftFoundryModelInfo),
 
 		// Act mode configurations
 		actModeApiProvider:
@@ -788,5 +794,7 @@ export function convertProtoToApiConfiguration(protoConfig: ProtoApiConfiguratio
 		actModeVercelAiGatewayModelId: protoConfig.actModeVercelAiGatewayModelId,
 		actModeVercelAiGatewayModelInfo: convertProtoToModelInfo(protoConfig.actModeVercelAiGatewayModelInfo),
 		actModeMicrosoftFoundryDeploymentName: protoConfig.actModeMicrosoftFoundryDeploymentName,
+		actModeMicrosoftFoundryUseReasoning: protoConfig.actModeMicrosoftFoundryUseReasoning,
+		actModeMicrosoftFoundryModelInfo: convertProtoToModelInfo(protoConfig.actModeMicrosoftFoundryModelInfo),
 	}
 }

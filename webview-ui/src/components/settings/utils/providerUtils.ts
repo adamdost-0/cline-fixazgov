@@ -539,7 +539,6 @@ export function getModeSpecificFields(apiConfiguration: ApiConfiguration | undef
 			nousResearchModelId: undefined,
 			vercelAiGatewayModelId: undefined,
 			microsoftFoundryDeploymentName: undefined,
-			microsoftFoundryUseReasoning: undefined,
 			microsoftFoundryModelInfo: undefined,
 
 			// Model info objects
@@ -598,10 +597,6 @@ export function getModeSpecificFields(apiConfiguration: ApiConfiguration | undef
 			mode === "plan"
 				? apiConfiguration.planModeMicrosoftFoundryDeploymentName
 				: apiConfiguration.actModeMicrosoftFoundryDeploymentName,
-		microsoftFoundryUseReasoning:
-			mode === "plan"
-				? apiConfiguration.planModeMicrosoftFoundryUseReasoning
-				: apiConfiguration.actModeMicrosoftFoundryUseReasoning,
 		microsoftFoundryModelInfo:
 			mode === "plan"
 				? apiConfiguration.planModeMicrosoftFoundryModelInfo
@@ -816,8 +811,6 @@ export async function syncModeConfigurations(
 		case "microsoft-foundry":
 			updates.planModeMicrosoftFoundryDeploymentName = sourceFields.microsoftFoundryDeploymentName
 			updates.actModeMicrosoftFoundryDeploymentName = sourceFields.microsoftFoundryDeploymentName
-			updates.planModeMicrosoftFoundryUseReasoning = sourceFields.microsoftFoundryUseReasoning
-			updates.actModeMicrosoftFoundryUseReasoning = sourceFields.microsoftFoundryUseReasoning
 			updates.planModeMicrosoftFoundryModelInfo = sourceFields.microsoftFoundryModelInfo
 			updates.actModeMicrosoftFoundryModelInfo = sourceFields.microsoftFoundryModelInfo
 			break

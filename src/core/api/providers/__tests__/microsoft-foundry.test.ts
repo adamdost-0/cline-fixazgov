@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, it } from "mocha"
 import "should"
 import sinon from "sinon"
-import { classifyAzureEndpoint, getAzureCognitiveScope } from "@shared/api"
+import { classifyAzureEndpoint, getAzureCognitiveScope, microsoftFoundryModelInfoSaneDefaults } from "@shared/api"
 import { ClineStorageMessage } from "@/shared/messages/content"
 import { MicrosoftFoundryHandler } from "../microsoft-foundry"
 
@@ -215,6 +215,30 @@ describe("Microsoft Foundry Provider", () => {
 				// Should return the explicit deployment name, not apiModelId
 				model.id.should.equal("primary-deployment")
 			})
+		})
+	})
+
+	describe("Government Test Bench", () => {
+		it("should classify test bench endpoint as government", () => {
+			classifyAzureEndpoint("https://test123123.openai.azure.us")!.should.equal("government")
+			classifyAzureEndpoint("https://test123123.openai.azure.us/")!.should.equal("government")
+		})
+
+		it("should return government cognitive scope for test bench", () => {
+			getAzureCognitiveScope("https://test123123.openai.azure.us")!.should.equal(
+				"https://cognitiveservices.azure.us/.default",
+			)
+		})
+
+		it("should detect government cloud in handler for test bench endpoint", () => {
+			const handler = new MicrosoftFoundryHandler({
+				microsoftFoundryEndpoint: "https://test123123.openai.azure.us",
+				microsoftFoundryDeploymentName: "gpt-4o",
+				microsoftFoundryAuthMode: "entra-id",
+			})
+
+			const cloudEnv = (handler as any).getCloudEnvironment()
+			cloudEnv.should.equal("government")
 		})
 	})
 })

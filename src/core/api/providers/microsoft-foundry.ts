@@ -13,7 +13,7 @@
  * - https://learn.microsoft.com/en-us/azure/ai-foundry/foundry-models/how-to/configure-entra-id
  * - https://learn.microsoft.com/en-us/azure/ai-foundry/openai/azure-government
  */
-import { DefaultAzureCredential, getBearerTokenProvider } from "@azure/identity"
+import { AzureAuthorityHosts, DefaultAzureCredential, getBearerTokenProvider } from "@azure/identity"
 import {
 	type AzureCloudEnvironment,
 	classifyAzureEndpoint,
@@ -114,9 +114,11 @@ export class MicrosoftFoundryHandler implements ApiHandler {
 					if (!scope) {
 						throw new Error("Unable to determine token scope for endpoint: " + endpoint)
 					}
+					const authorityHost =
+						cloud === "government" ? AzureAuthorityHosts.AzureGovernment : AzureAuthorityHosts.AzurePublicCloud
 					this.client = new AzureOpenAI({
 						endpoint,
-						azureADTokenProvider: getBearerTokenProvider(new DefaultAzureCredential(), scope),
+						azureADTokenProvider: getBearerTokenProvider(new DefaultAzureCredential({ authorityHost }), scope),
 						apiVersion,
 						defaultHeaders: externalHeaders,
 						fetch,

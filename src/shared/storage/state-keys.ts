@@ -187,6 +187,8 @@ const API_HANDLER_SETTINGS_FIELDS = {
 	planModeVercelAiGatewayModelId: { default: undefined as string | undefined },
 	planModeVercelAiGatewayModelInfo: { default: undefined as ModelInfo | undefined },
 	planModeMicrosoftFoundryDeploymentName: { default: undefined as string | undefined },
+	planModeMicrosoftFoundryUseReasoning: { default: undefined as boolean | undefined },
+	planModeMicrosoftFoundryModelInfo: { default: undefined as ModelInfo | undefined },
 
 	// Act mode configurations
 	actModeApiModelId: { default: undefined as string | undefined },
@@ -230,6 +232,8 @@ const API_HANDLER_SETTINGS_FIELDS = {
 	actModeVercelAiGatewayModelId: { default: undefined as string | undefined },
 	actModeVercelAiGatewayModelInfo: { default: undefined as ModelInfo | undefined },
 	actModeMicrosoftFoundryDeploymentName: { default: undefined as string | undefined },
+	actModeMicrosoftFoundryUseReasoning: { default: undefined as boolean | undefined },
+	actModeMicrosoftFoundryModelInfo: { default: undefined as ModelInfo | undefined },
 
 	// Model-specific settings
 	planModeApiProvider: { default: DEFAULT_API_PROVIDER as ApiProvider },
