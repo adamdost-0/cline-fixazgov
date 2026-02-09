@@ -116,6 +116,8 @@ export async function updateApiConfigurationProto(
 			geminiActModeThinkingLevel: protoApiConfiguration.geminiActModeThinkingLevel,
 			planModeReasoningEffort: protoApiConfiguration.planModeReasoningEffort as OpenaiReasoningEffort | undefined,
 			actModeReasoningEffort: protoApiConfiguration.actModeReasoningEffort as OpenaiReasoningEffort | undefined,
+			// Cast proto string to typed auth mode union
+			microsoftFoundryAuthMode: protoApiConfiguration.microsoftFoundryAuthMode as "entra-id" | "api-key" | undefined,
 		}
 
 		// Update the API configuration in storage

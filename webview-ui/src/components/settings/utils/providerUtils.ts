@@ -38,6 +38,7 @@ import {
 	mainlandQwenModels,
 	mainlandZAiDefaultModelId,
 	mainlandZAiModels,
+	microsoftFoundryModelInfoSaneDefaults,
 	minimaxDefaultModelId,
 	minimaxModels,
 	mistralDefaultModelId,
@@ -164,6 +165,7 @@ export function getModelsForProvider(
 		case "oca":
 		case "aihubmix":
 		case "together":
+		case "microsoft-foundry":
 		default:
 			return undefined
 	}
@@ -500,6 +502,20 @@ export function normalizeApiConfiguration(
 						? nousResearchModels[nousResearchModelId as keyof typeof nousResearchModels]
 						: nousResearchModels[nousResearchDefaultModelId],
 			}
+		case "microsoft-foundry":
+			const msFoundryDeploymentName =
+				currentMode === "plan"
+					? apiConfiguration?.planModeMicrosoftFoundryDeploymentName
+					: apiConfiguration?.actModeMicrosoftFoundryDeploymentName
+			const msFoundryModelInfo =
+				currentMode === "plan"
+					? apiConfiguration?.planModeMicrosoftFoundryModelInfo
+					: apiConfiguration?.actModeMicrosoftFoundryModelInfo
+			return {
+				selectedProvider: provider,
+				selectedModelId: msFoundryDeploymentName || "",
+				selectedModelInfo: msFoundryModelInfo || microsoftFoundryModelInfoSaneDefaults,
+			}
 		default:
 			return getProviderData(anthropicModels, anthropicDefaultModelId)
 	}
@@ -535,6 +551,8 @@ export function getModeSpecificFields(apiConfiguration: ApiConfiguration | undef
 			aihubmixModelId: undefined,
 			nousResearchModelId: undefined,
 			vercelAiGatewayModelId: undefined,
+			microsoftFoundryDeploymentName: undefined,
+			microsoftFoundryModelInfo: undefined,
 
 			// Model info objects
 			openAiModelInfo: undefined,
@@ -588,6 +606,14 @@ export function getModeSpecificFields(apiConfiguration: ApiConfiguration | undef
 			mode === "plan" ? apiConfiguration.planModeNousResearchModelId : apiConfiguration.actModeNousResearchModelId,
 		vercelAiGatewayModelId:
 			mode === "plan" ? apiConfiguration.planModeVercelAiGatewayModelId : apiConfiguration.actModeVercelAiGatewayModelId,
+		microsoftFoundryDeploymentName:
+			mode === "plan"
+				? apiConfiguration.planModeMicrosoftFoundryDeploymentName
+				: apiConfiguration.actModeMicrosoftFoundryDeploymentName,
+		microsoftFoundryModelInfo:
+			mode === "plan"
+				? apiConfiguration.planModeMicrosoftFoundryModelInfo
+				: apiConfiguration.actModeMicrosoftFoundryModelInfo,
 
 		// Model info objects
 		openAiModelInfo: mode === "plan" ? apiConfiguration.planModeOpenAiModelInfo : apiConfiguration.actModeOpenAiModelInfo,
@@ -795,6 +821,13 @@ export async function syncModeConfigurations(
 			updates.actModeAihubmixModelInfo = sourceFields.aihubmixModelInfo
 			break
 
+		case "microsoft-foundry":
+			updates.planModeMicrosoftFoundryDeploymentName = sourceFields.microsoftFoundryDeploymentName
+			updates.actModeMicrosoftFoundryDeploymentName = sourceFields.microsoftFoundryDeploymentName
+			updates.planModeMicrosoftFoundryModelInfo = sourceFields.microsoftFoundryModelInfo
+			updates.actModeMicrosoftFoundryModelInfo = sourceFields.microsoftFoundryModelInfo
+			break
+
 		// Providers that use apiProvider + apiModelId fields
 		case "anthropic":
 		case "claude-code":
@@ -903,6 +936,18 @@ export const getProviderInfo = (
 					effectiveMode === "plan" ? apiConfiguration.planModeRequestyModelId : apiConfiguration.actModeRequestyModelId,
 				baseUrl: apiConfiguration.requestyBaseUrl,
 				helpText: "Add your Requesty API key in settings",
+			}
+		case "microsoft-foundry":
+			return {
+				modelId:
+					effectiveMode === "plan"
+						? apiConfiguration.planModeMicrosoftFoundryDeploymentName
+						: apiConfiguration.actModeMicrosoftFoundryDeploymentName,
+				baseUrl: apiConfiguration.microsoftFoundryEndpoint,
+				helpText:
+					apiConfiguration.microsoftFoundryAuthMode === "api-key"
+						? "Enter your Azure AI Foundry endpoint, deployment name, and API key."
+						: "Enter your Azure AI Foundry endpoint and deployment name. Entra ID (SSO) will use your Azure CLI/VS sign-in.",
 			}
 		case "together":
 			return {

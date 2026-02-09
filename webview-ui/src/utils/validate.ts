@@ -12,6 +12,7 @@ export function validateApiConfiguration(currentMode: Mode, apiConfiguration?: A
 			ollamaModelId,
 			lmStudioModelId,
 			vsCodeLmModelSelector,
+			microsoftFoundryDeploymentName,
 		} = getModeSpecificFields(apiConfiguration, currentMode)
 
 		switch (apiProvider) {
@@ -170,6 +171,20 @@ export function validateApiConfiguration(currentMode: Mode, apiConfiguration?: A
 			case "hicap":
 				if (!apiConfiguration.hicapApiKey) {
 					return "You must provide a valid API key"
+				}
+				break
+			case "microsoft-foundry":
+				if (!apiConfiguration.microsoftFoundryEndpoint) {
+					return "You must provide an Azure AI Foundry endpoint URL."
+				}
+				if (
+					apiConfiguration.microsoftFoundryAuthMode === "api-key" &&
+					!apiConfiguration.microsoftFoundryApiKey
+				) {
+					return "You must provide an API key when using API Key authentication, or switch to Entra ID (SSO)."
+				}
+				if (!microsoftFoundryDeploymentName) {
+					return "You must provide a deployment name for your Azure AI Foundry model."
 				}
 				break
 		}

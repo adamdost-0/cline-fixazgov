@@ -1,0 +1,66 @@
+---
+title: "Microsoft Foundry (Azure AI Foundry)"
+description: "Learn how to configure and use Azure AI Foundry models with Cline, including Azure Government support."
+---
+
+Cline supports accessing OpenAI models deployed through **Microsoft Azure AI Foundry**, with support for both Azure Commercial and Azure Government cloud environments.
+
+**Website:** [https://ai.azure.com/](https://ai.azure.com/)
+
+### Prerequisites
+
+1. An **Azure subscription** with access to Azure AI Foundry (formerly Azure OpenAI Service).
+2. A **model deployment** in your Azure AI Foundry resource (e.g., GPT-4.1, GPT-5.2, o-series).
+3. Your **endpoint URL** and either an **API key** or **Entra ID (Azure AD)** credentials.
+
+### Getting Your Endpoint and Key
+
+1. **Sign in** to the [Azure Portal](https://portal.azure.com/) or [Azure AI Foundry](https://ai.azure.com/).
+2. **Navigate** to your Azure OpenAI or AI Foundry resource.
+3. **Copy the endpoint URL** from the resource overview (e.g., `https://your-resource.openai.azure.com/`).
+4. **Copy an API key** from the "Keys and Endpoint" section, or configure Entra ID authentication.
+5. **Note your deployment name** — this is the name you gave your model deployment (not the model name itself).
+
+### Supported Authentication Modes
+
+-   **Entra ID (SSO):** Uses your Azure identity via `DefaultAzureCredential`. Supports Azure CLI login, Managed Identity, and other standard Azure credential chains. No API key required.
+-   **API Key:** Traditional key-based authentication. Enter your endpoint URL, API key, and deployment name.
+
+### Supported Endpoint Patterns
+
+| Cloud Environment | Endpoint Pattern |
+|---|---|
+| **Azure Commercial** | `*.openai.azure.com`, `*.services.ai.azure.com`, `*.cognitiveservices.azure.com` |
+| **Azure Government** | `*.openai.azure.us`, `*.services.ai.azure.us`, `*.cognitiveservices.azure.us`, `*.usgovcloudapi.net` |
+
+The provider automatically detects your cloud environment from the endpoint URL and configures the correct authentication scope.
+
+### Supported Models
+
+Any model deployed in Azure AI Foundry is supported, including:
+
+-   `gpt-5.2`, `gpt-5`
+-   `gpt-4.1`, `gpt-4.1-mini`, `gpt-4.1-nano`
+-   `gpt-4o`, `gpt-4o-mini`
+-   `o3`, `o4-mini`, `o1`
+
+For the current list of available models, see the [Azure AI Foundry Model Catalog](https://ai.azure.com/catalog/models).
+
+### Configuration in Cline
+
+1.  **Open Cline Settings:** Click the settings gear icon (⚙️) in the Cline panel.
+2.  **Select Provider:** Choose "Microsoft Foundry" from the "API Provider" dropdown menu.
+3.  **Choose Auth Mode:** Select either "Entra ID (SSO)" or "API Key (BYOK)".
+4.  **Enter Endpoint:** Paste your Azure AI Foundry endpoint URL. A cloud environment badge will confirm detection.
+5.  **Enter API Key:** (API Key mode only) Paste your API key.
+6.  **Enter Deployment Name:** Enter the name of your model deployment (this is the name you assigned, not the model name).
+7.  **(Optional) Reasoning Effort:** For reasoning models (o-series, GPT-5), configure reasoning effort via the Reasoning Effort selector.
+8.  **(Optional) Context Window / Max Tokens:** Customize context window size and max output tokens for your deployment.
+
+### Tips and Notes
+
+-   **Deployment names are not model names:** Azure lets you name deployments anything. The provider does not auto-detect the model from the deployment name — configure reasoning effort manually if using a reasoning model.
+-   **Azure Government:** Ensure your endpoint uses a `.azure.us` or `.usgovcloudapi.net` domain. The provider automatically selects the correct Entra ID token audience.
+-   **Entra ID setup:** For SSO authentication, ensure you are logged in via Azure CLI (`az login`) or have a Managed Identity configured. See [Configure Entra ID for Azure AI Foundry](https://learn.microsoft.com/en-us/azure/ai-foundry/foundry-models/how-to/configure-entra-id).
+-   **API Version:** The default API version is `2024-10-21`. You can override this in the optional API Version field if needed.
+-   **Pricing:** Review [Azure OpenAI Pricing](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/) for costs associated with your deployments.
