@@ -3,6 +3,7 @@ import {
 	ApiProvider,
 	DEFAULT_API_PROVIDER,
 	LiteLLMModelInfo,
+	MicrosoftFoundryAuthMode,
 	ModelInfo,
 	type OcaModelInfo,
 	OpenAiCompatibleModelInfo,
@@ -139,6 +140,11 @@ const API_HANDLER_SETTINGS_FIELDS = {
 	aihubmixBaseUrl: { default: undefined as string | undefined },
 	aihubmixAppCode: { default: undefined as string | undefined },
 
+	// Microsoft Foundry global configuration
+	microsoftFoundryEndpoint: { default: undefined as string | undefined },
+	microsoftFoundryAuthMode: { default: "entra-id" as MicrosoftFoundryAuthMode },
+	microsoftFoundryApiVersion: { default: undefined as string | undefined },
+
 	// Plan mode configurations
 	planModeApiModelId: { default: undefined as string | undefined },
 	planModeThinkingBudgetTokens: { default: undefined as number | undefined },
@@ -180,6 +186,9 @@ const API_HANDLER_SETTINGS_FIELDS = {
 	planModeNousResearchModelId: { default: undefined as string | undefined },
 	planModeVercelAiGatewayModelId: { default: undefined as string | undefined },
 	planModeVercelAiGatewayModelInfo: { default: undefined as ModelInfo | undefined },
+	planModeMicrosoftFoundryDeploymentName: { default: undefined as string | undefined },
+	planModeMicrosoftFoundryUseReasoning: { default: undefined as boolean | undefined },
+	planModeMicrosoftFoundryModelInfo: { default: undefined as ModelInfo | undefined },
 
 	// Act mode configurations
 	actModeApiModelId: { default: undefined as string | undefined },
@@ -222,6 +231,9 @@ const API_HANDLER_SETTINGS_FIELDS = {
 	actModeNousResearchModelId: { default: undefined as string | undefined },
 	actModeVercelAiGatewayModelId: { default: undefined as string | undefined },
 	actModeVercelAiGatewayModelInfo: { default: undefined as ModelInfo | undefined },
+	actModeMicrosoftFoundryDeploymentName: { default: undefined as string | undefined },
+	actModeMicrosoftFoundryUseReasoning: { default: undefined as boolean | undefined },
+	actModeMicrosoftFoundryModelInfo: { default: undefined as ModelInfo | undefined },
 
 	// Model-specific settings
 	planModeApiProvider: { default: DEFAULT_API_PROVIDER as ApiProvider },
@@ -344,6 +356,7 @@ const SECRETS_KEYS = [
 	"ocaRefreshToken",
 	"mcpOAuthSecrets",
 	"openai-codex-oauth-credentials", // JSON blob containing OAuth tokens for OpenAI Codex (ChatGPT subscription)
+	"microsoftFoundryApiKey",
 ] as const
 
 export const LocalStateKeys = [

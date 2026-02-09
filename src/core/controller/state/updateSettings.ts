@@ -43,6 +43,8 @@ export async function updateSettings(controller: Controller, request: UpdateSett
 					: undefined,
 				planModeReasoningEffort: protoApiConfiguration.planModeReasoningEffort as OpenaiReasoningEffort | undefined,
 				actModeReasoningEffort: protoApiConfiguration.actModeReasoningEffort as OpenaiReasoningEffort | undefined,
+				// Cast proto string to typed auth mode union
+				microsoftFoundryAuthMode: protoApiConfiguration.microsoftFoundryAuthMode as "entra-id" | "api-key" | undefined,
 			}
 
 			controller.stateManager.setApiConfiguration(convertedApiConfigurationFromProto)

@@ -23,6 +23,7 @@ import { HuggingFaceHandler } from "./providers/huggingface"
 import { LiteLlmHandler } from "./providers/litellm"
 import { LmStudioHandler } from "./providers/lmstudio"
 import { MinimaxHandler } from "./providers/minimax"
+import { MicrosoftFoundryHandler } from "./providers/microsoft-foundry"
 import { MistralHandler } from "./providers/mistral"
 import { MoonshotHandler } from "./providers/moonshot"
 import { NebiusHandler } from "./providers/nebius"
@@ -441,6 +442,26 @@ function createHandlerForProvider(
 				onRetryAttempt: options.onRetryAttempt,
 				nousResearchApiKey: options.nousResearchApiKey,
 				apiModelId: mode === "plan" ? options.planModeNousResearchModelId : options.actModeNousResearchModelId,
+			})
+		case "microsoft-foundry":
+			return new MicrosoftFoundryHandler({
+				onRetryAttempt: options.onRetryAttempt,
+				microsoftFoundryEndpoint: options.microsoftFoundryEndpoint,
+				microsoftFoundryApiKey: options.microsoftFoundryApiKey,
+				microsoftFoundryDeploymentName:
+					mode === "plan"
+						? options.planModeMicrosoftFoundryDeploymentName
+						: options.actModeMicrosoftFoundryDeploymentName,
+				microsoftFoundryAuthMode: options.microsoftFoundryAuthMode,
+				microsoftFoundryApiVersion: options.microsoftFoundryApiVersion,
+				apiModelId: mode === "plan" ? options.planModeApiModelId : options.actModeApiModelId,
+				reasoningEffort: mode === "plan" ? options.planModeReasoningEffort : options.actModeReasoningEffort,
+				microsoftFoundryModelInfo:
+					mode === "plan"
+						? options.planModeMicrosoftFoundryModelInfo
+						: options.actModeMicrosoftFoundryModelInfo,
+				thinkingBudgetTokens:
+					mode === "plan" ? options.planModeThinkingBudgetTokens : options.actModeThinkingBudgetTokens,
 			})
 		default:
 			return new AnthropicHandler({
